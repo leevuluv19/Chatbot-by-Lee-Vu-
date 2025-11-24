@@ -85,6 +85,8 @@ st.markdown("""
         
         pointer-events: none;
         z-index: -1;
+        /* --- THÊM DÒNG NÀY ĐỂ VIỀN MỜ ẢO --- */
+        filter: blur(2px);
     }
 
     /* CĂN CHỈNH VỊ TRÍ */
@@ -138,8 +140,8 @@ st.markdown("""
 # --- 3. TIÊU ĐỀ ---
 st.markdown("""
     <div class="title-container">
-        <div class="main-title">😎 Lê Vũ Depzai</div>
-        <div class="sub-title">Trò chuyện cùng anh Lê Vũ</div>
+        <div class="main-title">Lê Vũ Depzai</div>
+        <div class="sub-title">Trò chuyện cùng trí tuệ nhân tạo của Lê Vũ</div>
     </div>
 """, unsafe_allow_html=True)
 
