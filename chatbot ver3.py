@@ -252,7 +252,7 @@ with st.container():
         image_to_send = None
         if uploaded_file:
             image_to_send = Image.open(uploaded_file)
-            st.image(image_to_send, width=150, caption="Ảnh đã chọn")
+            st.image(image_to_send, width=50, caption="Ảnh đã chọn")
             st.caption("✅ Ảnh đã sẵn sàng. Nhấn Enter để gửi.")
 
     # 7.2. Thanh Chat Input (Nằm ngay dưới)
