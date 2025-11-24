@@ -3,7 +3,7 @@ import google.generativeai as genai
 from PIL import Image
 
 
-st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
+st.set_page_config(page_title="Lê Vũ Depzai", layout="centered")
 
 
 st.markdown("""
@@ -212,8 +212,8 @@ st.markdown("""
 # --- 3. TIÊU ĐỀ (NHƯ ẢNH 1) ---
 st.markdown("""
     <div class="title-container">
-        <div class="main-title">😎 Lê Vũ Depzai</div>
-        <div class="sub-title">Trò chuyện & Phân tích ảnh</div>
+        <div class="main-title"> Lê Vũ Depzai</div>
+        <div class="sub-title">Trí tuệ nhân tạo của Lê Vũ</div>
     </div>
 """, unsafe_allow_html=True)
 
@@ -239,7 +239,7 @@ chat_container = st.container()
 with chat_container:
     for message in st.session_state.messages:
         if message["role"] == "user":
-            st.markdown(f"""<div class="user-row"><div class="liquid-glass"><span class="icon">🔴</span> <div>{message["content"]}</div></div></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div class="user-row"><div class="liquid-glass"><span class="icon">⭐</span> <div>{message["content"]}</div></div></div>""", unsafe_allow_html=True)
         else:
             st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div>{message["content"]}</div></div></div>""", unsafe_allow_html=True)
 
@@ -253,7 +253,7 @@ with st.container():
         if uploaded_file:
             image_to_send = Image.open(uploaded_file)
             st.image(image_to_send, width=150, caption="Ảnh đã chọn")
-            st.caption("✅ Ảnh đã sẵn sàng. Hãy nhập tin nhắn và nhấn Enter để gửi.")
+            st.caption("✅ Ảnh đã sẵn sàng. Nhấn Enter để gửi.")
 
     # 7.2. Thanh Chat Input (Nằm ngay dưới)
     user_input = st.chat_input("Nhập tin nhắn của bạn...")
@@ -267,7 +267,7 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
 
     # Hiện tin nhắn User ngay lập tức vào lịch sử
     with chat_container:
-        st.markdown(f"""<div class="user-row"><div class="liquid-glass"><span class="icon">🔴</span> <div>{display_text}</div></div></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="user-row"><div class="liquid-glass"><span class="icon">⭐</span> <div>{display_text}</div></div></div>""", unsafe_allow_html=True)
         if image_to_send:
             with st.chat_message("user", avatar=None): # Dùng container chuẩn để hiện ảnh cho đẹp
                 st.image(image_to_send, width=300)
@@ -283,7 +283,7 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
 
         # Hiển thị spinner trong lúc chờ
         with chat_container:
-            with st.spinner("Đang suy nghĩ..."):
+            with st.spinner("Le Vu Intelligence đang suy nghĩ...."):
                 response = st.session_state.chat_session.send_message(inputs)
                 bot_reply = response.text
         
