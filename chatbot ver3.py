@@ -83,9 +83,6 @@ st.markdown("""
     
     /* Ẩn các phần thừa của uploader */
     [data-testid="stFileUploader"] section { padding: 0 !important; min-height: 0 !important; }
-    [data-testid="stFileUploader"] div[data-testid="stUploadDropzone"] { display: none !important; }
-    [data-testid="stFileUploader"] small { display: none !important; }
-    [data-testid="stFileUploader"] label { display: none !important; } /* Ẩn nhãn */
     [data-testid="stFileUploader"] span { display: none !important; } /* Ẩn chữ Drag drop */
 
     /* Tạo hình cái nút tròn */
