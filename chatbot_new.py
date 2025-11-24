@@ -14,7 +14,7 @@ st.markdown(f"""
     .stApp {{
         position: relative;
         /* Link ảnh nền chất lỏng tối */
-        background-image: url("file://{BACKGROUND_IMAGE_PATH}");
+        background-image: url("file:///mnt/data/34186a31-8244-4e99-a4e1-baca2de654b5.png");
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
@@ -31,20 +31,38 @@ st.markdown(f"""
     #MainMenu, footer, header {{visibility: hidden;}}
 
     /* --- STYLE CHUNG CHO CÁC KHUNG "LIQUID GLASS" --- */
-    .liquid-glass {{
+    .liquid-glass {
         position: relative; z-index: 1; /* Hiển thị trên lớp phủ */
-        backdrop-filter: blur(15px); /* Hiệu ứng kính mờ */
-        -webkit-backdrop-filter: blur(15px);
-        background: rgba(255, 255, 255, 0.06); /* Nền kính trong suốt nhẹ */
-        border-radius: 25px; /* thay đổi theo đề xuất để giống ảnh */
-        padding: 15px 20px;
-        margin-bottom: 15px;
+        backdrop-filter: blur(20px) saturate(120%); /* blur mạnh hơn + tăng độ bão hoà */
+        -webkit-backdrop-filter: blur(20px) saturate(120%);
+        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); /* nền kính nhẹ hơn, gradient mượt */
+        border-radius: 28px; /* bo tròn lớn */
+        padding: 18px 22px;
+        margin-bottom: 18px;
         color: #ffffff;
         font-weight: 500;
         display: flex;
         align-items: center;
-        box-shadow: inset 0 0 15px rgba(255,255,255,0.03); /* Bóng kính bên trong */
-        border: 2px solid transparent; /* Viền trong suốt để chuẩn bị cho màu */
+        box-shadow: 0 8px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03); /* bóng ngoài sâu + inset nhẹ */
+        border: 1px solid rgba(255,255,255,0.06); /* viền trắng mờ để cảm giác kính */
+        overflow: hidden;
+    }
+    /* sheen (ánh sáng lướt trên kính) */
+    .liquid-glass::after {
+        content: "";
+        position: absolute;
+        top: -40%; left: -30%;
+        width: 60%; height: 160%;
+        background: linear-gradient(120deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02) 40%, rgba(255,255,255,0) 60%);
+        transform: rotate(-20deg);
+        filter: blur(12px);
+        opacity: 0.8;
+        pointer-events: none;
+    }
+    .liquid-glass .icon {
+        margin-right: 15px;
+        font-size: 1.8rem; /* to hơn chút để giống ảnh */
+        filter: drop-shadow(0 0 8px rgba(255,255,255,0.6));
     }}
     .liquid-glass .icon {{
         margin-right: 15px;
