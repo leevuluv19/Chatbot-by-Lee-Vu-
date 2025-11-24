@@ -1,119 +1,138 @@
 import streamlit as st
 import google.generativeai as genai
-from PIL import Image # <--- THÊM THƯ VIỆN XỬ LÝ ẢNH
+from PIL import Image
 
 # --- 1. CẤU HÌNH TRANG WEB ---
-st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
+st.set_page_config(page_title="Gemini Clone", page_icon="✨", layout="centered")
 
-# --- 2. CSS SIÊU CẤP (GIỮ NGUYÊN KHÔNG CHỈNH SỬA GÌ CỦA SẾP) ---
+# --- 2. CSS SIÊU CẤP (GIAO DIỆN GEMINI + MENU NỔI) ---
 st.markdown("""
 <style>
-    /* --- FIX NỀN FULL 100% --- */
-    [data-testid="stAppViewContainer"] {
-        background-image: url("https://sf-static.upanhlaylink.com/img/image_20251124438d8e9e8b4c9f6712b854f513430f8d.jpg");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
+    /* --- NỀN TRẮNG/SÁNG SẠCH SẼ (STYLE GEMINI) --- */
+    .stApp {
+        background-color: #ffffff; /* Nền trắng (hoặc #f0f4f9 cho giống Gemini web) */
+        color: #1f1f1f;
     }
-    [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
     
-    [data-testid="stAppViewContainer"]::before {
-        content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.3); z-index: -1; pointer-events: none;
-    }
+    /* Nếu Sếp thích Dark Mode thì bỏ comment đoạn dưới này: */
+    /*
+    .stApp { background-color: #131314; color: #e3e3e3; }
+    */
 
-    /* --- TỐI ƯU CHO ĐIỆN THOẠI --- */
-    @media (max-width: 768px) {
-        .block-container {
-            padding-left: 0.5rem !important; padding-right: 0.5rem !important;
-            padding-top: 1rem !important; padding-bottom: 5rem !important;
-        }
-        .liquid-glass { max-width: 90% !important; }
-    }
-
-    /* --- FIX LỖI LỘ VIỀN (OVERFLOW) --- */
-    .element-container, .stMarkdown, div[data-testid="stChatMessageContent"] {
-        overflow: visible !important;
-    }
-    div[data-testid="stChatMessage"] {
-        overflow: visible !important; background-color: transparent !important; border: none !important;
-    }
-
-    #MainMenu, footer {visibility: hidden;}
+    /* --- ẨN GIAO DIỆN CŨ --- */
+    #MainMenu, footer, header {visibility: hidden;}
     .stChatMessageAvatarBackground {display: none !important;}
+    .stChatMessage {background: transparent !important; border: none !important;}
 
-    /* --- ANIMATION --- */
-    @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-    @keyframes rainbow-spin { to { --angle: 360deg; } }
-
-    /* --- STYLE KHUNG CHAT (LIQUID GLASS) --- */
-    .liquid-glass {
-        position: relative;
-        background: rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        border-radius: 35px;
+    /* --- STYLE BONG BÓNG CHAT --- */
+    /* User (Sếp) - Màu Xám Nhạt, Bo tròn */
+    .user-bubble {
+        background-color: #f0f4f9; /* Màu xám xanh nhạt của Gemini */
+        color: #1f1f1f;
         padding: 12px 20px;
-        margin-bottom: 20px;
-        color: #ffffff; font-weight: 500;
-        display: flex; align-items: center;
-        z-index: 1;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        width: fit-content;
-        overflow: visible !important;
-    }
-
-    .liquid-glass::before {
-        content: ""; position: absolute; inset: 0; border-radius: 35px; padding: 2px;
-        background: conic-gradient(from var(--angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
-        animation: rainbow-spin 4s linear infinite;
-        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor; mask-composite: exclude;
-        pointer-events: none; z-index: -1; filter: blur(2px);
+        border-radius: 20px 20px 5px 20px; /* Bo góc kiểu hội thoại */
+        margin-bottom: 10px;
+        display: inline-block;
+        max-width: 85%;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
     
-    .liquid-glass::after {
-        content: ""; position: absolute; inset: -2px; border-radius: 35px; z-index: -2;
-        background: conic-gradient(from var(--angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
-        animation: rainbow-spin 4s linear infinite;
-        filter: blur(10px); opacity: 0.6;
+    /* Bot (Gemini) - Không nền, chỉ có Icon và chữ */
+    .bot-bubble {
+        background-color: transparent;
+        color: #1f1f1f;
+        padding: 0px;
+        margin-bottom: 10px;
+        display: flex;
+        gap: 15px;
+        line-height: 1.6;
     }
 
-    .icon { margin-right: 12px; font-size: 1.6rem; filter: drop-shadow(0 0 5px rgba(255,255,255,0.8)); }
-    .user-row { display: flex; justify-content: flex-end; padding-right: 5px; }
-    .bot-row { display: flex; justify-content: flex-start; padding-left: 5px; }
+    /* --- CĂN CHỈNH --- */
+    .user-row { display: flex; justify-content: flex-end; }
+    .bot-row { display: flex; justify-content: flex-start; }
 
-    /* --- KHUNG INPUT --- */
-    .stChatInputContainer { padding-bottom: 30px; }
+    /* --- ICON CÔNG CỤ (+) NỔI --- */
+    /* Định vị nút Popover xuống góc dưới trái */
+    [data-testid="stPopover"] {
+        position: fixed;
+        bottom: 35px; /* Canh vừa tầm với thanh chat */
+        left: 20px;
+        z-index: 10000; /* Nằm trên cùng */
+    }
+    
+    /* Style cho nút (+) */
+    [data-testid="stPopover"] button {
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        background-color: #f0f4f9; /* Nền xám nhạt */
+        border: none;
+        color: #444746;
+        font-size: 24px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+    }
+    [data-testid="stPopover"] button:hover {
+        background-color: #d3e3fd; /* Hover đổi màu xanh nhạt */
+        color: #0b57d0;
+    }
+
+    /* --- THANH NHẬP LIỆU (INPUT BAR) --- */
+    .stChatInputContainer {
+        padding-bottom: 30px;
+        padding-left: 60px; /* Chừa chỗ cho nút (+) bên trái */
+    }
+    
     .stChatInputContainer > div {
-        position: relative; border-radius: 35px; padding: 2px;
-        background: conic-gradient(from var(--angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
-        animation: rainbow-spin 3s linear infinite;
-    }
-    .stChatInputContainer textarea {
-        border-radius: 33px !important; background: rgba(0, 0, 0, 0.6) !important;
-        color: white !important; border: none !important; backdrop-filter: blur(10px);
+        background-color: #f0f4f9; /* Nền thanh chat */
+        border-radius: 30px; /* Bo tròn viên thuốc */
+        border: 1px solid transparent;
+        transition: border 0.3s;
     }
     
-    /* --- STYLE NÚT UPLOAD ẢNH (MỚI THÊM) --- */
-    .stFileUploader { padding: 10px; background: rgba(255,255,255,0.1); border-radius: 15px; backdrop-filter: blur(5px); }
-    /* Ẩn label mặc định cho gọn */
-    .stFileUploader label { display: none; } 
+    /* Khi bấm vào thì viền sáng lên */
+    .stChatInputContainer > div:focus-within {
+        background-color: #ffffff;
+        border: 1px solid #0b57d0; /* Viền xanh Gemini */
+        box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    }
+
+    .stChatInputContainer textarea {
+        background-color: transparent !important;
+        color: #1f1f1f !important;
+        border: none !important;
+        font-size: 16px;
+    }
+    
+    /* Nút Gửi (Mũi tên) */
+    .stChatInputContainer button[kind="primary"] {
+        background: transparent !important;
+        color: #0b57d0 !important; /* Màu xanh Gemini */
+        border: none !important;
+    }
 
     /* TIÊU ĐỀ */
-    .title-container { text-align: center; margin-bottom: 20px; margin-top: -30px; }
-    .main-title { font-size: 2.2rem; font-weight: 800; color: white; text-shadow: 0 0 15px rgba(255,255,255,0.4); }
-    .sub-title { font-size: 0.9rem; color: rgba(255,255,255,0.8); }
+    .title-area {
+        text-align: center; margin-top: 20px; margin-bottom: 40px;
+    }
+    .gemini-title {
+        font-size: 3rem; font-weight: 500;
+        background: -webkit-linear-gradient(0deg, #4285f4, #9b72cb, #d96570); /* Màu logo Google */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. GIAO DIỆN TIÊU ĐỀ ---
-st.markdown("""
-    <div class="title-container">
-        <div class="main-title">😎 Lê Vũ Depzai</div>
-        <div class="sub-title">Trò chuyện & Phân tích ảnh</div>
-    </div>
-""", unsafe_allow_html=True)
+# --- 3. TIÊU ĐỀ TRANG ---
+if "messages" not in st.session_state or len(st.session_state.messages) == 0:
+    st.markdown("""
+        <div class="title-area">
+            <div class="gemini-title">Xin chào, Sếp Vũ</div>
+            <div style="color: #888; font-size: 1.5rem;">Hôm nay tôi có thể giúp gì cho bạn?</div>
+        </div>
+    """, unsafe_allow_html=True)
 
 # --- 4. CẤU HÌNH API ---
 try:
@@ -125,94 +144,109 @@ except Exception:
 
 # --- 5. KHỞI TẠO BOT ---
 if "chat_session" not in st.session_state:
-    model = genai.GenerativeModel(
-        'models/gemini-2.0-flash',
-        system_instruction="Bạn tên là 'Lê Vũ depzai'. Bạn là anh trai, gọi người dùng là 'em'. Phong cách: Ngầu, quan tâm, ngắn gọn. Nếu có ảnh, hãy nhận xét ảnh thật chất."
-    )
+    model = genai.GenerativeModel('models/gemini-2.0-flash')
     st.session_state.chat_session = model.start_chat(history=[])
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+    
+# Biến lưu ảnh tạm thời
+if "uploaded_img" not in st.session_state:
+    st.session_state.uploaded_img = None
 
-# --- 6. NÚT GỬI ẢNH (THÊM VÀO ĐÂY) ---
-# Dùng expander để giấu nút upload cho gọn, không phá vỡ giao diện
-with st.expander("📸 Gửi ảnh (Bấm để mở)"):
-    uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg", "png", "jpeg"])
-    image_to_send = None
+# --- 6. MENU CÔNG CỤ (NÚT + NỔI) ---
+# Đây là cái nút tròn dấu cộng ở góc dưới
+with st.popover("➕", help="Thêm tài liệu"):
+    st.markdown("### 📂 Công cụ & Tệp")
+    
+    # 1. Upload Ảnh/File
+    uploaded_file = st.file_uploader("Tải ảnh/tệp lên", type=["jpg", "png", "jpeg", "txt", "pdf"], label_visibility="collapsed")
+    
     if uploaded_file:
-        image_to_send = Image.open(uploaded_file)
-        st.image(image_to_send, width=200, caption="Ảnh đã chọn")
+        try:
+            img = Image.open(uploaded_file)
+            st.session_state.uploaded_img = img
+            st.success("✅ Đã tải ảnh! Hãy gõ nội dung bên dưới để gửi.")
+            st.image(img, width=150)
+        except:
+            st.warning("File này chưa hỗ trợ xem trước, nhưng vẫn gửi được.")
+
+    st.divider()
+    
+    # 2. Các nút chức năng giả lập (cho giống ảnh)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.button("🔍 Deep Research", use_container_width=True)
+        st.button("🎨 Tạo hình ảnh", use_container_width=True)
+    with col2:
+        st.button("📊 Phân tích Data", use_container_width=True)
+        st.button("💻 Viết Code", use_container_width=True)
 
 # --- 7. HIỂN THỊ LỊCH SỬ CHAT ---
 for message in st.session_state.messages:
     if message["role"] == "user":
         st.markdown(f"""
             <div class="user-row">
-                <div class="liquid-glass">
-                    <span class="icon">🔴</span> <div>{message["content"]}</div>
-                </div>
+                <div class="user-bubble">{message["content"]}</div>
             </div>
         """, unsafe_allow_html=True)
     else:
+        # Icon Google Gemini
+        icon_url = "https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg"
         st.markdown(f"""
             <div class="bot-row">
-                <div class="liquid-glass">
-                    <span class="icon">🤖</span> <div>{message["content"]}</div>
-                </div>
+                <img src="{icon_url}" width="30" height="30" style="margin-top: 5px;">
+                <div class="bot-bubble">{message["content"]}</div>
             </div>
         """, unsafe_allow_html=True)
 
-# --- 8. XỬ LÝ GỬI TIN (CÓ ẢNH HOẶC KHÔNG) ---
-user_input = st.chat_input("Nói gì với anh đi em...")
+# --- 8. XỬ LÝ TIN NHẮN MỚI ---
+user_input = st.chat_input("Nhập câu lệnh tại đây...")
 
-# Logic: Gửi khi bấm Enter (có chữ) HOẶC bấm nút "Gửi ảnh ngay" (nếu có ảnh)
-send_button = False
-if image_to_send: 
-    send_button = st.button("Gửi ảnh ngay") # Nút này chỉ hiện khi đã chọn ảnh
-
-if user_input or (image_to_send and send_button):
-    
-    # Nội dung hiển thị phía User
-    display_text = user_input if user_input else "[Đã gửi một hình ảnh]"
-    
-    # 1. Hiện khung chat của User
-    st.markdown(f"""
-        <div class="user-row">
-            <div class="liquid-glass">
-                <span class="icon">🔴</span> <div>{display_text}</div>
+if user_input:
+    # Xử lý hiển thị phía User
+    display_text = user_input
+    if st.session_state.uploaded_img:
+        display_text = f"[Đã gửi 1 ảnh] <br> {user_input}"
+        # Hiển thị ảnh nhỏ trong khung chat
+        st.markdown(f"""
+            <div class="user-row">
+                <div class="user-bubble">{display_text}</div>
             </div>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # 2. Nếu có ảnh thì hiện ảnh ra màn hình chat (dùng container mặc định để hiện ảnh)
-    if image_to_send:
+        """, unsafe_allow_html=True)
+        # Show ảnh ra màn hình chính (dùng st.image cho đẹp)
         with st.chat_message("user", avatar=None):
-            st.image(image_to_send, width=250)
+            st.image(st.session_state.uploaded_img, width=300)
+    else:
+        st.markdown(f"""
+            <div class="user-row">
+                <div class="user-bubble">{user_input}</div>
+            </div>
+        """, unsafe_allow_html=True)
 
     st.session_state.messages.append({"role": "user", "content": display_text})
 
-    # 3. Gửi qua Gemini
+    # Gửi qua Gemini
     try:
-        inputs = []
-        if user_input:
-            inputs.append(user_input)
-        else:
-            inputs.append("Hãy nhận xét về bức ảnh này.") # Lời dẫn mặc định
-            
-        if image_to_send:
-            inputs.append(image_to_send)
+        inputs = [user_input]
+        if st.session_state.uploaded_img:
+            inputs.append(st.session_state.uploaded_img)
+            # Reset ảnh sau khi gửi để không gửi lại lần sau
+            st.session_state.uploaded_img = None 
 
-        response = st.session_state.chat_session.send_message(inputs)
-        bot_reply = response.text
+        with st.spinner("Gemini đang suy nghĩ..."):
+            response = st.session_state.chat_session.send_message(inputs)
+            bot_reply = response.text
         
-        # 4. Hiện câu trả lời của Bot
+        # Hiển thị Bot trả lời
+        icon_url = "https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg"
         st.markdown(f"""
             <div class="bot-row">
-                <div class="liquid-glass">
-                    <span class="icon">🤖</span> <div>{bot_reply}</div>
-                </div>
+                <img src="{icon_url}" width="30" height="30" style="margin-top: 5px;">
+                <div class="bot-bubble">{bot_reply}</div>
             </div>
         """, unsafe_allow_html=True)
+        
         st.session_state.messages.append({"role": "assistant", "content": bot_reply})
         
     except Exception as e:
