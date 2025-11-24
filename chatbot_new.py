@@ -2,130 +2,133 @@ import streamlit as st
 import google.generativeai as genai
 
 # --- 1. CẤU HÌNH TRANG WEB ---
-st.set_page_config(page_title="Lê Vũ AI", page_icon="", layout="centered")
+st.set_page_config(page_title="Lê Vũ AI", layout="centered")
 
-# --- 2. CSS "APPLE INTELLIGENCE" TOÀN MÀN HÌNH ---
+# --- 2. CSS SIÊU CẤP (Liquid Background + Glass + Apple Border + No Avatar) ---
 st.markdown("""
 <style>
-    /* 1. Nền đen sâu */
+    /* 1. Cài hình nền Liquid (Dạng lỏng chảy) */
     .stApp {
-        background-color: #000000;
-        color: #FFFFFF;
+        background-image: url("https://img.freepik.com/free-photo/abstract-black-oil-paint-texture-background_53876-102366.jpg?t=st=1732523000~exp=1732526600~hmac=6c938906103908084700262070402040");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
     }
-
-    /* --- HIỆU ỨNG VIỀN CHẠY TOÀN MÀN HÌNH --- */
-    @keyframes border-dance {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-
-    /* Tạo lớp phủ viền 7 màu */
+    
+    /* Làm lớp phủ tối màu lên nền cho dễ đọc chữ */
     .stApp::before {
         content: "";
-        position: fixed;
-        top: 0; 
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 999999; 
-        pointer-events: none; 
-        
-        /* Độ dày viền: 4px */
-        padding: 4px; 
-        
-        /* Màu gradient 7 màu Apple */
-        background: linear-gradient(
-            60deg, 
-            #00C6FF, #0072FF, #D53369, #DA22FF, #9733EE, #8A2387, #00C6FF
-        );
-        background-size: 300% 300%;
-        animation: border-dance 4s ease infinite; 
-        
-        /* Cắt giữa để lộ nội dung */
-        -webkit-mask: 
-            linear-gradient(#fff 0 0) content-box, 
-            linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5); /* Tối 50% */
+        z-index: -1;
     }
 
-    /* 2. Chỉnh tin nhắn User */
-    div[data-testid="stChatMessage"]:nth-child(even) {
-        background-color: #1C1C1E;
-        color: #FFFFFF;
-        border-radius: 20px;
-        border: 1px solid #333333;
-        padding: 10px;
-    }
-
-    /* 3. Chỉnh tin nhắn Bot */
-    div[data-testid="stChatMessage"]:nth-child(odd) {
-        background-color: #000000;
-        color: #FFFFFF;
-        border-radius: 20px;
-        padding: 10px;
-        box-shadow: 0 0 15px rgba(0, 198, 255, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    /* 4. Tiêu đề Gradient */
-    h1 {
-        background: -webkit-linear-gradient(45deg, #00C6FF, #0072FF, #D53369);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-align: center;
-        font-weight: 800;
+    /* 2. ẨN AVATAR (Theo lệnh Sếp) */
+    div[data-testid="stChatMessageAvatarBackground"] {
+        display: none !important;
     }
     
-    /* Ẩn Menu mặc định */
+    /* Căn chỉnh lại tin nhắn vì đã mất avatar */
+    div[data-testid="stChatMessageContent"] {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+
+    /* 3. KHUNG CHAT GLASSMORPHISM (Kính trong suốt) + VIỀN APPLE */
+    div[data-testid="stChatMessage"] {
+        background: rgba(255, 255, 255, 0.05); /* Nền kính mờ */
+        backdrop-filter: blur(15px); /* Làm mờ hậu cảnh */
+        border-radius: 20px;
+        padding: 15px;
+        margin-bottom: 15px;
+        
+        /* Viền Apple Intelligence 7 màu phát sáng */
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        position: relative;
+        box-shadow: 0 0 15px rgba(0, 198, 255, 0.2); /* Glow nhẹ */
+    }
+    
+    /* Tạo viền gradient bằng pseudo-element */
+    div[data-testid="stChatMessage"]::before {
+        content: "";
+        position: absolute;
+        top: -2px; bottom: -2px; left: -2px; right: -2px;
+        background: linear-gradient(90deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3);
+        z-index: -1;
+        border-radius: 22px;
+        opacity: 0.6;
+    }
+
+    /* Màu chữ */
+    div[data-testid="stChatMessage"] p {
+        color: #FFFFFF !important;
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    /* 4. TIÊU ĐỀ */
+    h1 {
+        color: #FFFFFF;
+        text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        text-align: center;
+    }
+
+    /* 5. KHUNG NHẬP LIỆU (Cũng làm kính luôn) */
+    .stChatInputContainer textarea {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+    }
+    
+    /* Ẩn menu mặc định */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    
+
 </style>
 """, unsafe_allow_html=True)
 
-# --- TIÊU ĐỀ ---
-st.title(" Lê Vũ Intelligence (Ver 1.0)")
-st.caption("Designed by Le Van Vu | Powered by Gemini 2.0 Flash")
+# --- GIAO DIỆN CHÍNH ---
+st.title("😎 Lê Vũ Depzai (Anh Trai)")
 
-# --- 3. CẤU HÌNH API (BẢO MẬT) ---
+# --- 3. CẤU HÌNH API ---
 try:
     api_key = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=api_key)
 except Exception:
-    st.error("Chưa có chìa khóa trong két sắt!")
+    st.error("⚠️ Chưa nhập chìa khóa vào két sắt (Secrets)!")
 
-# --- 4. KHỞI TẠO BOT ---
+# --- 4. LOGIC BOT ---
 if "chat_session" not in st.session_state:
     model = genai.GenerativeModel(
         'models/gemini-2.0-flash',
-        system_instruction="Bạn tên là 'Lê Vũ depzai'. Bạn BẮT BUỘC phải gọi người dùng là 'tình yêu'. Phong cách: Ngầu, tinh tế, thông minh."
+        system_instruction="Bạn tên là 'Lê Vũ depzai'. Bạn BẮT BUỘC phải gọi người dùng là 'em' và xưng 'anh'. Phong cách: Ngầu, lạnh lùng, chiều chuộng."
     )
     st.session_state.chat_session = model.start_chat(history=[])
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# --- 5. HIỂN THỊ LỊCH SỬ ---
+# --- 5. HIỂN THỊ LỊCH SỬ (Không Avatar) ---
 for message in st.session_state.messages:
-    avatar = "❤️" if message["role"] == "user" else "🤖"
-    with st.chat_message(message["role"], avatar=avatar):
+    # Avatar=None để không hiện icon mặc định, CSS sẽ ẩn luôn khung avatar
+    with st.chat_message(message["role"], avatar=None): 
         st.markdown(message["content"])
 
 # --- 6. XỬ LÝ TIN NHẮN ---
-user_input = st.chat_input("Nhập tin nhắn vào đây ...")
+user_input = st.chat_input("Nói gì với anh đi em...")
 
 if user_input:
-    with st.chat_message("user", avatar="❤️"):
-        st.markdown(f"{user_input}")
+    with st.chat_message("user", avatar=None):
+        st.markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
     try:
         response = st.session_state.chat_session.send_message(user_input)
         bot_reply = response.text
         
-        with st.chat_message("assistant", avatar="🤖"):
+        with st.chat_message("assistant", avatar=None):
             st.markdown(bot_reply)
         st.session_state.messages.append({"role": "assistant", "content": bot_reply})
         
