@@ -4,7 +4,7 @@ import google.generativeai as genai
 # --- 1. CẤU HÌNH TRANG WEB ---
 st.set_page_config(page_title="Lê Vũ AI", page_icon="", layout="centered")
 
-# --- 2. CSS SIÊU CẤP (APPLE INTELLIGENCE GLOW + VISION OS GLASS) ---
+# --- 2. CSS SIÊU CẤP (KÍNH TÀNG HÌNH + XOAY LIỀN MẠCH) ---
 st.markdown("""
 <style>
     /* --- NỀN FULL MÀN HÌNH --- */
@@ -19,7 +19,7 @@ st.markdown("""
     }
     .stApp::before {
         content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.2); /* Giảm độ tối để nền liquid nổi hơn */
+        background: rgba(0, 0, 0, 0.2); /* Nền tối nhẹ */
         z-index: -1; pointer-events: none;
     }
 
@@ -38,16 +38,17 @@ st.markdown("""
         to { --angle: 360deg; }
     }
 
-    /* --- KHUNG CHAT CHUẨN APPLE (VISION OS GLASS) --- */
+    /* --- KHUNG CHAT SIÊU TRONG SUỐT (ULTRA CLEAR) --- */
     .liquid-glass {
         position: relative;
         
-        /* Nền kính siêu trong (Apple Style) */
-        background: rgba(255, 255, 255, 0.03); 
-        backdrop-filter: blur(25px) saturate(180%); /* Blur mạnh + Tăng bão hòa màu nền */
-        -webkit-backdrop-filter: blur(25px) saturate(180%);
+        /* CHỈNH ĐỘ TRONG Ở ĐÂY: Để 0.01 là gần như tàng hình */
+        background: rgba(255, 255, 255, 0.01); 
         
-        /* Bo tròn mạnh hình viên thuốc (Capsule) */
+        /* Blur nhẹ hơn để nhìn rõ nền */
+        backdrop-filter: blur(10px); 
+        -webkit-backdrop-filter: blur(10px);
+        
         border-radius: 35px;
         padding: 12px 25px;
         margin-bottom: 15px;
@@ -56,41 +57,55 @@ st.markdown("""
         display: flex; align-items: center;
         z-index: 1;
         
-        /* Hiệu ứng bóng kính phản chiếu nhẹ bên trên */
-        box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 4px 20px rgba(0,0,0,0.3);
-        border: 1px solid rgba(255,255,255,0.1); /* Viền kính mỏng */
+        /* Viền kính siêu mỏng */
+        border: 1px solid rgba(255,255,255,0.05);
         
         width: fit-content; max-width: 85%;
     }
 
-    /* --- VIỀN PHÁT SÁNG APPLE INTELLIGENCE --- */
+    /* --- VIỀN 7 MÀU XOAY LIỀN MẠCH (KHÔNG NGẮT QUÃNG) --- */
     .liquid-glass::before {
         content: "";
         position: absolute;
-        inset: -2px; /* Viền dày 2px */
+        inset: 0; /* Phủ kín khung */
         z-index: -1;
-        border-radius: 36px; 
+        border-radius: 35px; 
+        padding: 2px; /* ĐỘ DÀY VIỀN */
         
-        /* Dải màu Apple Intelligence Chính Hãng (Cyan - Blue - Purple - Pink - Orange) */
+        /* Dải màu LIỀN MẠCH (Full Circle) */
+        /* Quan trọng: Màu đầu (#00C6FF) và màu cuối (#00C6FF) PHẢI GIỐNG NHAU để xoay không bị giật */
         background: conic-gradient(
             from var(--angle), 
-            transparent 30%,
-            #00C6FF, #0072FF, #8E2DE2, #F80759, #FF8C00, #00C6FF
+            #00C6FF, #0072FF, #8E2DE2, #F80759, #FF8C00, #E0C3FC, #00C6FF
         );
         
-        animation: spin 4s linear infinite;
-        filter: blur(8px); /* Loe sáng mạnh (Glow) */
-        opacity: 0.8;
+        animation: spin 4s linear infinite; /* Xoay đều 4 giây 1 vòng */
+        
+        /* Kỹ thuật Mask: Chỉ hiện viền */
+        -webkit-mask: 
+           linear-gradient(#fff 0 0) content-box, 
+           linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        
+        /* Glow nhẹ */
+        filter: blur(1px);
     }
     
-    /* Lớp viền sắc nét bên trong (để định hình rõ hơn) */
+    /* Lớp Glow loe sáng bên ngoài */
     .liquid-glass::after {
         content: "";
         position: absolute;
-        inset: 0;
-        z-index: -1;
+        inset: -2px;
+        z-index: -2;
         border-radius: 35px;
-        background: rgba(0,0,0,0.4); /* Lớp nền tối nhẹ sau kính để chữ rõ hơn */
+        background: conic-gradient(
+            from var(--angle), 
+            #00C6FF, #0072FF, #8E2DE2, #F80759, #FF8C00, #E0C3FC, #00C6FF
+        );
+        animation: spin 4s linear infinite;
+        filter: blur(10px); /* Độ loe sáng */
+        opacity: 0.7;
     }
 
     .icon {
@@ -106,15 +121,16 @@ st.markdown("""
     .stChatInputContainer { padding: 20px 0; }
     .stChatInputContainer > div {
         position: relative; border-radius: 35px; padding: 2px;
+        /* Cũng xoay liền mạch luôn */
         background: conic-gradient(from var(--angle), #00C6FF, #8E2DE2, #F80759, #FF8C00, #00C6FF);
         animation: spin 4s linear infinite;
-        box-shadow: 0 0 20px rgba(0, 198, 255, 0.3);
+        box-shadow: 0 0 20px rgba(0, 198, 255, 0.2);
     }
     .stChatInputContainer textarea {
         border-radius: 33px !important;
-        background: rgba(0, 0, 0, 0.5) !important;
+        background: rgba(0, 0, 0, 0.3) !important; /* Input cũng trong hơn */
         color: white !important; border: none !important;
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(15px);
     }
 
     /* TIÊU ĐỀ */
