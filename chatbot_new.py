@@ -10,7 +10,7 @@ st.markdown("""
     /* --- NỀN LIQUID DARK --- */
     .stApp {
         /* Link ảnh nền chất lỏng tối */
-        background-image: url("https://www.freepik.com/free-photo/marbled-blue-abstract-background-liquid-marble-pattern_26435892.htm#fromView=image_search&page=1&position=6&uuid=a1c9367a-3035-4104-a595-eedad14fbfd8");
+        background-image: url("https://sf-static.upanhlaylink.com/img/image_20251124438d8e9e8b4c9f6712b854f513430f8d.jpg");
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
