@@ -4,7 +4,7 @@ import google.generativeai as genai
 # --- 1. CẤU HÌNH TRANG WEB ---
 st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
 
-# --- 2. CSS SIÊU CẤP (COMBO TẤT CẢ TÍNH NĂNG) ---
+# --- 2. CSS SIÊU CẤP (Final Boss: Liquid + Glass + Apple + No Avatar) ---
 st.markdown("""
 <style>
     /* 1. NỀN LIQUID (Ảnh chất lỏng) */
@@ -41,7 +41,7 @@ st.markdown("""
         color: #FFFFFF !important;
         border: 1px solid rgba(255,255,255,0.1);
         box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        width: fit-content !important; /* Chỉ rộng bằng nội dung chữ */
+        width: fit-content !important;
         max-width: 85%;
         display: inline-block;
     }
@@ -59,7 +59,7 @@ st.markdown("""
         box-shadow: 0 0 15px rgba(255, 0, 255, 0.4); /* Phát sáng hồng */
     }
 
-    /* Tin nhắn của BOT (Anh Trai) -> Sang Trái + Viền Xanh Cyan */
+    /* Tin nhắn của BOT (Anh Trai) -> Sang Trái + Viền Xanh Neon */
     div[data-testid="stChatMessage"]:nth-child(odd) .stChatMessageContent {
         margin-right: auto;
         border: 1px solid #00FFFF; /* Viền xanh */
@@ -101,4 +101,34 @@ if "chat_session" not in st.session_state:
         'models/gemini-2.0-flash',
         system_instruction="Bạn tên là 'Lê Vũ depzai'. Bạn là anh trai, gọi người dùng là 'em'. Phong cách: Ngầu, lạnh lùng, chiều chuộng. Trả lời ngắn gọn."
     )
-    st.session_state.chat_session = model.
+    # ĐÂY LÀ DÒNG BỊ LỖI TRƯỚC ĐÓ, GIỜ ĐÃ SỬA:
+    st.session_state.chat_session = model.start_chat(history=[])
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# --- 5. HIỂN THỊ LỊCH SỬ (Ẩn Avatar bằng code) ---
+for message in st.session_state.messages:
+    with st.chat_message(message["role"], avatar=None): 
+        st.markdown(message["content"])
+
+# --- 6. XỬ LÝ TIN NHẮN ---
+user_input = st.chat_input("Nói gì với anh đi em...")
+
+if user_input:
+    # User chat
+    with st.chat_message("user", avatar=None):
+        st.markdown(user_input)
+    st.session_state.messages.append({"role": "user", "content": user_input})
+
+    # Bot chat
+    try:
+        response = st.session_state.chat_session.send_message(user_input)
+        bot_reply = response.text
+        
+        with st.chat_message("assistant", avatar=None):
+            st.markdown(bot_reply)
+        st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+        
+    except Exception as e:
+        st.error(f"Lỗi kết nối: {e}")
