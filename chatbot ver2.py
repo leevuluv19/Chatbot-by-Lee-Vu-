@@ -59,25 +59,24 @@ st.markdown("""
         to { --angle: 360deg; }
     }
 
-    /* 3. TẠO VIỀN CHẠY NỐI ĐUÔI (Quan trọng nhất) */
+    /* --- VIỀN 7 MÀU XOAY TRÒN LIỀN MẠCH (FULL MÀU) --- */
     .liquid-glass::before {
         content: "";
         position: absolute;
-        inset: 0;             /* Phủ kín khung */
-        border-radius: 25px;  /* Bo góc cho khớp */
-        padding: 2px;         /* ĐỘ DÀY VIỀN */
-        filter: blur(0px);
-        /* Dải màu hình nón: Đuôi trong suốt (transparent) -> Đầu 7 màu */
+        inset: 0;
+        border-radius: 20px; 
+        padding: 2px; /* ĐỘ DÀY VIỀN */
+        
+        /* Dải màu liền mạch (Không có chữ transparent) */
         background: conic-gradient(
             from var(--angle), 
-            transparent 5%, 
-            #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000
+            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
         );
         
-        /* Lệnh chạy */
-        animation: rainbow-spin 5s linear infinite;
+        /* Tốc độ xoay */
+        animation: rainbow-spin 4s linear infinite;
         
-        /* Kỹ thuật Mask: Đục thủng phần giữa để nhìn xuyên thấu */
+        /* Đục lỗ giữa */
         -webkit-mask: 
            linear-gradient(#fff 0 0) content-box, 
            linear-gradient(#fff 0 0);
