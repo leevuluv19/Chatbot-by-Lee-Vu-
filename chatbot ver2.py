@@ -70,7 +70,7 @@ st.markdown("""
         /* Dải màu hình nón: Đuôi trong suốt (transparent) -> Đầu 7 màu */
         background: conic-gradient(
             from var(--angle), 
-            transparent 10%, 
+            transparent 5%, 
             #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000
         );
         
