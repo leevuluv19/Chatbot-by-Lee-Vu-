@@ -37,10 +37,10 @@ st.markdown("""
     .liquid-glass {
         position: relative;
         
-        /* Nền kính trong suốt (Đen mờ 30%) */
+        /* Nền kính trong suốt (Đen mờ 10%) */
         background: rgba(0, 0, 0, 0.3); 
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         
         border-radius: 25px;
         padding: 15px 25px;
@@ -50,7 +50,7 @@ st.markdown("""
         display: flex;
         align-items: center;
         z-index: 1;
-        max-width: 85%;
+        max-width: 50%;
         box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
 
@@ -70,7 +70,7 @@ st.markdown("""
         background-size: 400%; /* Kéo dài dải màu */
         
         /* Animation chạy liên tục */
-        animation: rainbow-run 4s linear infinite;
+        animation: rainbow-run 10s linear infinite;
         
         /* --- PHÉP THUẬT ĐỤC LỖ --- */
         /* Dùng mask để đục thủng phần giữa, chỉ giữ lại viền */
