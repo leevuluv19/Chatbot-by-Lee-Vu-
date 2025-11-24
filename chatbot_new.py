@@ -4,7 +4,7 @@ import google.generativeai as genai
 # --- 1. CẤU HÌNH TRANG WEB ---
 st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
 
-# --- 2. CSS SIÊU CẤP (NỀN MỚI + VIỀN 7 MÀU CHẠY) ---
+# --- 2. CSS SIÊU CẤP (NỀN MỚI + VIỀN 7 MÀU CHẠY + NỀN TRONG SUỐT) ---
 st.markdown("""
 <style>
     /* 1. NỀN LIQUID DARK (Link ảnh Sếp gửi) */
@@ -32,12 +32,14 @@ st.markdown("""
         100% { background-position: 0% 50%; }
     }
 
-    /* --- 4. STYLE KHUNG CHAT (GLASS + VIỀN CHẠY) --- */
+    /* --- 4. STYLE KHUNG CHAT (GLASS TRONG SUỐT + VIỀN CHẠY) --- */
     .liquid-glass {
         position: relative;
-        background: rgba(255, 255, 255, 0.05); /* Kính mờ */
+        /* Nền kính trong suốt mờ */
+        background: rgba(255, 255, 255, 0.05); 
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
+        
         border-radius: 20px;
         padding: 15px 20px;
         margin-bottom: 15px;
@@ -46,21 +48,28 @@ st.markdown("""
         display: flex;
         align-items: center;
         z-index: 1; /* Để đè lên viền */
+        border: 2px solid transparent; /* Viền trong suốt để định hình */
     }
 
-    /* TẠO VIỀN GIẢ CHẠY BÊN DƯỚI */
+    /* TẠO VIỀN GIẢ CHẠY BÊN DƯỚI (Dùng ::before) */
     .liquid-glass::before {
         content: "";
         position: absolute;
-        inset: -2px; /* Viền dày 2px */
-        z-index: -1;
+        /* Inset âm để tạo độ dày cho viền (2px) */
+        top: -2px; left: -2px; right: -2px; bottom: -2px;
+        z-index: -1; /* Nằm dưới nội dung chat */
         border-radius: 22px; 
+        
         /* Dải màu cầu vồng */
         background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
         background-size: 400%;
+        
         /* Kích hoạt chạy */
         animation: rainbow-run 5s linear infinite;
-        opacity: 0.8;
+        
+        /* Tạo hiệu ứng phát sáng (Glow) nhẹ cho viền */
+        filter: blur(1px);
+        opacity: 0.9;
     }
 
     .icon {
@@ -78,8 +87,9 @@ st.markdown("""
     }
     .stChatInputContainer textarea {
         border-radius: 28px !important;
-        background: rgba(0, 0, 0, 0.7) !important;
+        background: rgba(0, 0, 0, 0.7) !important; /* Nền input tối hơn chút để dễ nhìn chữ */
         color: white !important; border: none !important;
+        backdrop-filter: blur(10px);
     }
 
     /* TIÊU ĐỀ */
