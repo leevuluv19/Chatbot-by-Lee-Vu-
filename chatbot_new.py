@@ -46,8 +46,8 @@ st.markdown("""
         background: rgba(255, 255, 255, 0.01); 
         
         /* Blur nhẹ hơn để nhìn rõ nền */
-        backdrop-filter: blur(10px); 
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(5px); 
+        -webkit-backdrop-filter: blur(5px);
         
         border-radius: 35px;
         padding: 12px 25px;
