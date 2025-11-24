@@ -80,9 +80,6 @@ st.markdown("""
         z-index: 999999 !important; /* Lớp cao nhất, đè lên tất cả */
         background-color: transparent !important;
     }
-    
-    /* Ẩn các phần thừa của uploader */
-    [data-testid="stFileUploader"] span { display: none !important; } /* Ẩn chữ Drag drop */
 
     /* Tạo hình cái nút tròn */
     [data-testid="stFileUploader"] button {
