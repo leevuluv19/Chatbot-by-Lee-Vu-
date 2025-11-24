@@ -31,8 +31,8 @@ st.markdown("""
         z-index: 999999; 
         pointer-events: none; 
         
-        /* Độ dày viền: 8px */
-        padding: 8px; 
+        /* Độ dày viền: 4px */
+        padding: 4px; 
         
         /* Màu gradient 7 màu Apple */
         background: linear-gradient(
