@@ -25,12 +25,6 @@ st.markdown("""
     .stChatMessageAvatarBackground {display: none !important;}
     .stChatMessage {background: transparent !important; border: none !important;}
 
-    /* --- 3. ANIMATION QUAY TRÒN --- */
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
     /* --- 4. STYLE KHUNG CHAT "CHASING NEON" --- */
     .neon-box {
         position: relative;
