@@ -4,7 +4,7 @@ from PIL import Image
 import json
 import secrets
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # --- CẤU HÌNH ADMIN ---
 FILE_DATA = "key_data.json"
@@ -26,39 +26,58 @@ def save_data(data):
     with open(FILE_DATA, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
 
-# [CẬP NHẬT] Hàm tạo key có thêm SĐT
-def tao_key_moi(sdt_khach, ghi_chu="Khach le"):
+# [CẬP NHẬT] Hàm tạo key nhận thêm số ngày sử dụng
+def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
     data = load_data()
     phan_duoi = secrets.token_hex(4).upper() 
     new_key = f"KEY-{phan_duoi[:4]}-{phan_duoi[4:]}"
     
+    # Tính ngày hết hạn
+    ngay_hien_tai = datetime.now()
+    ngay_het_han = ngay_hien_tai + timedelta(days=so_ngay_dung)
+    
     data[new_key] = {
         "status": "active",
-        "sdt": sdt_khach, # Lưu SĐT vào hệ thống
-        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "sdt": sdt_khach,
+        "created_at": ngay_hien_tai.strftime("%Y-%m-%d %H:%M"),
+        "expiry_date": ngay_het_han.strftime("%Y-%m-%d %H:%M"), # Lưu ngày hết hạn
         "note": ghi_chu
     }
     save_data(data)
-    return new_key
+    return new_key, ngay_het_han.strftime("%d/%m/%Y")
 
-# [CẬP NHẬT] Hàm check đăng nhập yêu cầu cả SĐT
+# [CẬP NHẬT] Hàm check đăng nhập kiểm tra hạn sử dụng
 def kiem_tra_dang_nhap(input_key, input_sdt):
-    # 1. Admin đăng nhập (Không cần SĐT, chỉ cần đúng Pass)
+    # 1. Admin
     if input_key == ADMIN_PASSWORD:
         return True, "admin", "Chào Sếp Vũ!"
     
-    # 2. Khách đăng nhập
+    # 2. Khách
     data = load_data()
     if input_key in data:
         thong_tin = data[input_key]
-        # Kiểm tra xem SĐT nhập vào có khớp với SĐT lúc mua Key không
-        if thong_tin.get("sdt") == input_sdt:
-            return True, "user", f"Xin chào {input_sdt}!"
-        else:
+        
+        # Check SĐT
+        if thong_tin.get("sdt") != input_sdt:
             return False, None, "❌ Sai số điện thoại đăng ký!"
+        
+        # Check Hạn sử dụng
+        han_su_dung_str = thong_tin.get("expiry_date")
+        if han_su_dung_str:
+            han_su_dung = datetime.strptime(han_su_dung_str, "%Y-%m-%d %H:%M")
+            if datetime.now() > han_su_dung:
+                return False, None, "⚠️ Key đã HẾT HẠN! Vui lòng liên hệ Admin để gia hạn."
+        
+        # Nếu OK hết
+        con_lai = ""
+        if han_su_dung_str:
+             han_su_dung = datetime.strptime(han_su_dung_str, "%Y-%m-%d %H:%M")
+             so_ngay_con = (han_su_dung - datetime.now()).days
+             con_lai = f"(Còn {so_ngay_con} ngày)"
+
+        return True, "user", f"Xin chào {input_sdt}! {con_lai}"
             
     return False, None, "❌ Key không tồn tại!"
-st.set_page_config(page_title="Lê Vũ Depzai", layout="centered")
 
 
 st.markdown("""
@@ -263,7 +282,7 @@ st.markdown("""
     .block-container { padding-bottom: 100px !important; }
 </style>
 """, unsafe_allow_html=True)
-# --- LOGIC CHẶN ĐĂNG NHẬP (CÓ SĐT) ---
+# --- LOGIC CHẶN ĐĂNG NHẬP ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_role" not in st.session_state:
@@ -273,18 +292,16 @@ if not st.session_state.logged_in:
     st.markdown("""
         <div class="title-container" style="margin-top: 100px;">
             <div class="main-title">🔒 BẢO MẬT</div>
-            <div class="sub-title">Nhập Key và SĐT để truy cập</div>
+            <div class="sub-title">Hệ thống Chatbot Premium</div>
         </div>
     """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        # Thêm ô nhập SĐT
         input_sdt = st.text_input("Số điện thoại:", placeholder="Nhập SĐT của bạn...")
-        input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key...", label_visibility="visible")
+        input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key kích hoạt...", label_visibility="visible")
         
         if st.button("ĐĂNG NHẬP 🚀", use_container_width=True):
-            # Gọi hàm kiểm tra mới
             success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
             if success:
                 st.session_state.logged_in = True
@@ -296,24 +313,38 @@ if not st.session_state.logged_in:
     st.stop()
 # --- PANEL QUẢN LÝ (ADMIN MỚI) ---
 if st.session_state.get("user_role") == "admin":
-    with st.expander("🛠️ ADMIN: CẤP KEY CHO SĐT", expanded=False):
-        c1, c2, c3 = st.columns([2, 2, 1])
+    with st.expander("🛠️ ADMIN: TẠO KEY BÁN HÀNG", expanded=False):
+        c1, c2 = st.columns(2)
         with c1:
-            sdt_input = st.text_input("SĐT Khách hàng", placeholder="VD: 0912xxx")
-        with c2:
-            note_input = st.text_input("Ghi chú", placeholder="VD: Khách Vip Tháng 12")
-        with c3:
-            st.write("") 
-            st.write("") 
-            btn_create = st.button("Tạo Key", use_container_width=True)
+            sdt_input = st.text_input("SĐT Khách hàng", placeholder="09xxxx")
+            note_input = st.text_input("Ghi chú", placeholder="Tên khách")
         
-        if btn_create:
-            if sdt_input:
-                k = tao_key_moi(sdt_input, note_input)
-                st.success(f"✅ Đã tạo cho {sdt_input}")
-                st.code(k, language="text")
-            else:
-                st.warning("Vui lòng nhập SĐT khách!")
+        with c2:
+            # Menu chọn thời hạn
+            option_time = st.selectbox(
+                "Gói thời gian:",
+                ("Dùng thử (1 ngày)", "1 Tuần (7 ngày)", "1 Tháng (30 ngày)", "3 Tháng (90 ngày)", "1 Năm (365 ngày)", "Vĩnh viễn (10 năm)")
+            )
+            
+            # Logic đổi lựa chọn thành số ngày
+            days_map = {
+                "Dùng thử (1 ngày)": 1,
+                "1 Tuần (7 ngày)": 7,
+                "1 Tháng (30 ngày)": 30,
+                "3 Tháng (90 ngày)": 90,
+                "1 Năm (365 ngày)": 365,
+                "Vĩnh viễn (10 năm)": 3650
+            }
+            so_ngay = days_map[option_time]
+            
+            st.write("")
+            if st.button("Tạo Key & Lưu", use_container_width=True):
+                if sdt_input:
+                    k, han_dung = tao_key_moi(sdt_input, note_input, so_ngay)
+                    st.success(f"✅ Tạo thành công! Hết hạn ngày: {han_dung}")
+                    st.code(k, language="text")
+                else:
+                    st.warning("Thiếu SĐT kìa sếp ơi!")
 # Tạo container để chứa lịch sử chat, nằm bên trên khu vực nhập liệu
 chat_container = st.container()
 with chat_container:
