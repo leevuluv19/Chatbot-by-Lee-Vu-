@@ -48,7 +48,7 @@ st.markdown("""
     .liquid-glass::before {
         content: ""; position: absolute; inset: 0; border-radius: 35px; padding: 2px;
         background: conic-gradient(from var(--angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
-        animation: rainbow-spin 4s linear infinite;
+        animation: rainbow-spin 10s linear infinite;
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; z-index: -1; filter: blur(2px);
     }
@@ -67,7 +67,7 @@ st.markdown("""
     [data-testid="stFileUploader"] {
         position: fixed;
         bottom: 20px; /* Cách đáy 20px (ngang hàng với thanh chat) */
-        left: 20px;   /* Cách trái 20px */
+        left: 40px;   /* Cách trái 20px */
         width: 50px;  /* Thu nhỏ lại */
         z-index: 99999;
     }
