@@ -5,114 +5,126 @@ from PIL import Image
 # --- 1. CẤU HÌNH TRANG WEB ---
 st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
 
-# --- 2. CSS SIÊU CẤP (LIQUID GLASS + NEON BORDER + FULL MÀN HÌNH) ---
+# --- 2. CSS SIÊU CẤP: NỀN ẢNH 1 + CHAT STYLE ẢNH 3 ---
 st.markdown("""
 <style>
-    /* --- FIX NỀN FULL 100% KHÔNG CÓ VIỀN TRẮNG --- */
+    /* ================= GIỮ NGUYÊN NHƯ ẢNH 1 ================= */
+    /* --- Nền Full Màn Hình --- */
     [data-testid="stAppViewContainer"] {
-        background-image: url("https://sf-static.upanhlaylink.com/img/image_20251124438d8e9e8b4c9f6712b854f513430f8d.jpg");
+        background-image: url("https://sf-static.upanhlaylink.com/img/image_20251124438d8e9e8b4c9f6712b854f513430f8d.jpg"); /* Ảnh nền chất lừ */
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         background-attachment: fixed;
     }
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
-    
-    /* Lớp phủ tối */
+    /* Lớp phủ tối để làm nổi bật nội dung */
     [data-testid="stAppViewContainer"]::before {
         content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.3); z-index: -1; pointer-events: none;
+        background: rgba(0, 0, 0, 0.4); z-index: -1; pointer-events: none;
     }
 
-    /* --- TỐI ƯU CHO ĐIỆN THOẠI --- */
-    @media (max-width: 768px) {
-        .block-container {
-            padding-left: 0.5rem !important;
-            padding-right: 0.5rem !important;
-            padding-top: 1rem !important;
-            padding-bottom: 6rem !important;
-        }
-        .liquid-glass { max-width: 90% !important; }
-    }
+    /* --- Tiêu đề --- */
+    .title-container { text-align: center; margin-bottom: 30px; margin-top: -20px; }
+    .main-title { font-size: 2.5rem; font-weight: 800; color: white; text-shadow: 0 0 15px rgba(255,255,255,0.4); }
+    .sub-title { font-size: 1rem; color: rgba(255,255,255,0.8); letter-spacing: 1px; }
 
-    /* --- FIX LỖI LỘ VIỀN (OVERFLOW) --- */
-    .element-container, .stMarkdown, div[data-testid="stChatMessageContent"] {
-        overflow: visible !important;
-    }
-    div[data-testid="stChatMessage"] {
-        overflow: visible !important; background-color: transparent !important; border: none !important;
-    }
-
-    /* Ẩn giao diện cũ */
+    /* Ẩn các thành phần thừa */
     #MainMenu, footer {visibility: hidden;}
     .stChatMessageAvatarBackground {display: none !important;}
+    .stChatMessage {background: transparent !important; border: none !important;}
 
-    /* --- ANIMATION VIỀN CHẠY --- */
+    /* ================= GIỮ NGUYÊN NHƯ ẢNH 3 ================= */
+    /* --- Animation Viền Neon Cầu Vồng --- */
     @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
     @keyframes rainbow-spin { to { --angle: 360deg; } }
 
-    /* --- STYLE KHUNG CHAT (LIQUID GLASS) --- */
+    /* --- Bong bóng Chat "Liquid Glass" --- */
     .liquid-glass {
         position: relative;
-        background: rgba(0, 0, 0, 0.2); /* Kính trong suốt */
-        backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        border-radius: 35px; /* Bo tròn viên thuốc */
+        background: rgba(0, 0, 0, 0.3); /* Nền kính tối */
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); /* Hiệu ứng mờ kính */
+        border-radius: 30px;
         padding: 12px 20px;
-        margin-bottom: 20px;
-        color: #ffffff; font-weight: 500;
+        color: #ffffff;
+        font-weight: 500;
         display: flex; align-items: center;
         z-index: 1;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        width: fit-content;
-        overflow: visible !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        width: fit-content; max-width: 85%;
+        overflow: visible !important; /* Để viền sáng không bị cắt */
+        border: 1px solid rgba(255, 255, 255, 0.1); /* Viền mỏng tinh tế */
     }
 
-    /* VIỀN 7 MÀU CHẠY */
+    /* Lớp viền Neon chạy */
     .liquid-glass::before {
-        content: ""; position: absolute; inset: 0; border-radius: 35px; padding: 2px;
+        content: ""; position: absolute; inset: 0; border-radius: 30px; padding: 2px; /* Độ dày viền neon */
         background: conic-gradient(from var(--angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
         animation: rainbow-spin 4s linear infinite;
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor; mask-composite: exclude;
         pointer-events: none; z-index: -1;
-        filter: blur(2px); /* Làm mềm viền */
     }
     
-    /* HIỆU ỨNG GLOW (LOE SÁNG) */
+    /* Lớp phát sáng (Glow) */
     .liquid-glass::after {
-        content: ""; position: absolute; inset: -2px; border-radius: 35px; z-index: -2;
+        content: ""; position: absolute; inset: -3px; border-radius: 30px; z-index: -2;
         background: conic-gradient(from var(--angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
         animation: rainbow-spin 4s linear infinite;
-        filter: blur(10px); opacity: 0.6; /* Sáng mờ ảo */
+        filter: blur(15px); opacity: 0.5;
     }
 
-    .icon { margin-right: 12px; font-size: 1.6rem; filter: drop-shadow(0 0 5px rgba(255,255,255,0.8)); }
-    .user-row { display: flex; justify-content: flex-end; padding-right: 5px; }
-    .bot-row { display: flex; justify-content: flex-start; padding-left: 5px; }
+    /* Căn chỉnh hàng chat */
+    .icon { margin-right: 12px; font-size: 1.5rem; }
+    .user-row { display: flex; justify-content: flex-end; width: 100%; margin-bottom: 15px; }
+    .bot-row { display: flex; justify-content: flex-start; width: 100%; margin-bottom: 15px; }
 
-    /* --- KHUNG NHẬP LIỆU --- */
-    .stChatInputContainer { padding-bottom: 30px; }
-    .stChatInputContainer > div {
-        position: relative; border-radius: 35px; padding: 2px;
-        background: conic-gradient(from var(--angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
-        animation: rainbow-spin 3s linear infinite;
+    /* ================= GIAO DIỆN NHƯ ẢNH 2 ================= */
+    /* --- Style cho Thanh công cụ Upload (Expander) --- */
+    .streamlit-expanderHeader {
+        background-color: rgba(255, 255, 255, 0.1) !important; /* Nền trong suốt nhẹ */
+        border-radius: 15px !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        color: white !important;
+        font-weight: 500 !important;
     }
-    .stChatInputContainer textarea {
-        border-radius: 33px !important; background: rgba(0, 0, 0, 0.6) !important;
-        color: white !important; border: none !important; backdrop-filter: blur(10px);
+    [data-testid="stExpander"] {
+        border: none !important;
+        box-shadow: none !important;
+        margin-bottom: 10px; /* Khoảng cách với thanh chat */
+    }
+    /* Nội dung bên trong expander */
+    [data-testid="stExpander"] .streamlit-expanderContent {
+        background-color: rgba(0,0,0,0.3) !important;
+        border-radius: 0 0 15px 15px !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-top: none !important;
     }
     
-    /* Style nút Upload ảnh */
-    .stFileUploader { padding: 10px; background: rgba(255,255,255,0.1); border-radius: 15px; backdrop-filter: blur(5px); }
+    /* --- Style cho Thanh Chat Input --- */
+    .stChatInputContainer {
+        padding-bottom: 30px;
+    }
+    /* Áp dụng style Neon cho khung nhập liệu */
+    .stChatInputContainer > div {
+        border-radius: 30px; padding: 2px;
+        background: conic-gradient(from var(--angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+        animation: rainbow-spin 4s linear infinite;
+    }
+    .stChatInputContainer textarea {
+        border-radius: 28px !important;
+        background: rgba(0, 0, 0, 0.7) !important; /* Nền tối hơn chút để dễ đọc chữ */
+        color: white !important;
+        border: none !important;
+        padding-left: 15px !important;
+    }
 
-    /* TIÊU ĐỀ */
-    .title-container { text-align: center; margin-bottom: 20px; margin-top: -30px; }
-    .main-title { font-size: 2.2rem; font-weight: 800; color: white; text-shadow: 0 0 15px rgba(255,255,255,0.4); }
-    .sub-title { font-size: 0.9rem; color: rgba(255,255,255,0.8); }
+    /* Tối ưu khoảng cách container chính */
+    .block-container { padding-bottom: 100px !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. GIAO DIỆN TIÊU ĐỀ ---
+# --- 3. TIÊU ĐỀ (NHƯ ẢNH 1) ---
 st.markdown("""
     <div class="title-container">
         <div class="main-title">😎 Lê Vũ Depzai</div>
@@ -130,93 +142,73 @@ except Exception:
 
 # --- 5. KHỞI TẠO BOT ---
 if "chat_session" not in st.session_state:
-    model = genai.GenerativeModel(
-        'models/gemini-2.0-flash',
-        system_instruction="Bạn tên là 'Lê Vũ depzai'. Bạn là anh trai, gọi người dùng là 'em'. Phong cách: Ngầu, quan tâm, ngắn gọn. Nếu có ảnh, hãy nhận xét ảnh thật chất hoặc giải bài tập nếu có."
-    )
+    model = genai.GenerativeModel('models/gemini-2.0-flash')
     st.session_state.chat_session = model.start_chat(history=[])
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# --- 6. NÚT GỬI ẢNH ---
-with st.expander("📸 Gửi ảnh (Bấm để mở)"):
-    uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg", "png", "jpeg"])
-    image_to_send = None
-    if uploaded_file:
-        image_to_send = Image.open(uploaded_file)
-        st.image(image_to_send, width=200, caption="Ảnh đã chọn")
+# --- 6. LỊCH SỬ CHAT (STYLE NHƯ ẢNH 3) ---
+# Tạo container để chứa lịch sử chat, nằm bên trên khu vực nhập liệu
+chat_container = st.container()
+with chat_container:
+    for message in st.session_state.messages:
+        if message["role"] == "user":
+            st.markdown(f"""<div class="user-row"><div class="liquid-glass"><span class="icon">🔴</span> <div>{message["content"]}</div></div></div>""", unsafe_allow_html=True)
+        else:
+            st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div>{message["content"]}</div></div></div>""", unsafe_allow_html=True)
 
-# --- 7. HIỂN THỊ LỊCH SỬ CHAT ---
-for message in st.session_state.messages:
-    if message["role"] == "user":
-        st.markdown(f"""
-            <div class="user-row">
-                <div class="liquid-glass">
-                    <span class="icon">🔴</span> <div>{message["content"]}</div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown(f"""
-            <div class="bot-row">
-                <div class="liquid-glass">
-                    <span class="icon">🤖</span> <div>{message["content"]}</div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+# --- 7. KHU VỰC NHẬP LIỆU (BỐ CỤC NHƯ ẢNH 2) ---
+# Tạo container cố định ở đáy để chứa công cụ và thanh chat
+with st.container():
+    # 7.1. Thanh công cụ upload (Dạng Expander nằm trên)
+    with st.expander("📸 Tải ảnh lên (Nếu cần)", expanded=False):
+        uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
+        image_to_send = None
+        if uploaded_file:
+            image_to_send = Image.open(uploaded_file)
+            st.image(image_to_send, width=150, caption="Ảnh đã chọn")
+            st.caption("✅ Ảnh đã sẵn sàng. Hãy nhập tin nhắn và nhấn Enter để gửi.")
 
-# --- 8. XỬ LÝ GỬI TIN ---
-user_input = st.chat_input("Nói gì với anh đi em...")
+    # 7.2. Thanh Chat Input (Nằm ngay dưới)
+    user_input = st.chat_input("Nhập tin nhắn của bạn...")
 
-# Logic gửi: Bấm Enter hoặc bấm nút "Gửi ảnh ngay"
-send_button = False
-if image_to_send: 
-    send_button = st.button("Gửi ảnh ngay")
-
-if user_input or (image_to_send and send_button):
+# --- 8. XỬ LÝ LOGIC GỬI TIN ---
+if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
     
-    display_text = user_input if user_input else "[Đã gửi một hình ảnh]"
-    
-    # 1. Hiện User
-    st.markdown(f"""
-        <div class="user-row">
-            <div class="liquid-glass">
-                <span class="icon">🔴</span> <div>{display_text}</div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # 2. Hiện ảnh
+    display_text = user_input
     if image_to_send:
-        with st.chat_message("user", avatar=None):
-            st.image(image_to_send, width=250)
+        display_text = f"[Đã gửi kèm ảnh] <br> {user_input}"
 
+    # Hiện tin nhắn User ngay lập tức vào lịch sử
+    with chat_container:
+        st.markdown(f"""<div class="user-row"><div class="liquid-glass"><span class="icon">🔴</span> <div>{display_text}</div></div></div>""", unsafe_allow_html=True)
+        if image_to_send:
+            with st.chat_message("user", avatar=None): # Dùng container chuẩn để hiện ảnh cho đẹp
+                st.image(image_to_send, width=300)
+    
+    # Lưu vào session state
     st.session_state.messages.append({"role": "user", "content": display_text})
 
-    # 3. Gửi Gemini
+    # Gửi qua Gemini
     try:
-        inputs = []
-        if user_input:
-            inputs.append(user_input)
-        else:
-            inputs.append("Hãy nhận xét về bức ảnh này.")
-            
+        inputs = [user_input]
         if image_to_send:
             inputs.append(image_to_send)
 
-        response = st.session_state.chat_session.send_message(inputs)
-        bot_reply = response.text
+        # Hiển thị spinner trong lúc chờ
+        with chat_container:
+            with st.spinner("Đang suy nghĩ..."):
+                response = st.session_state.chat_session.send_message(inputs)
+                bot_reply = response.text
         
-        # 4. Hiện Bot
-        st.markdown(f"""
-            <div class="bot-row">
-                <div class="liquid-glass">
-                    <span class="icon">🤖</span> <div>{bot_reply}</div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+        # Hiện tin nhắn Bot
+        with chat_container:
+            st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div>{bot_reply}</div></div></div>""", unsafe_allow_html=True)
+        
+        # Lưu vào session state
         st.session_state.messages.append({"role": "assistant", "content": bot_reply})
         
     except Exception as e:
-        st.error(f"Lỗi: {e}")
+        with chat_container:
+            st.error(f"Lỗi: {e}")
