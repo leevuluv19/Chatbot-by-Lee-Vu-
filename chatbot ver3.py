@@ -2,12 +2,11 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 from streamlit_paste_button import paste_image_button
-import io
 
 # --- 1. CẤU HÌNH TRANG WEB ---
 st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
 
-# --- 2. CSS SIÊU CẤP (LIQUID NEON + TỐI ƯU THANH CÔNG CỤ CHAT) ---
+# --- 2. CSS SIÊU CẤP (LIQUID NEON + TỐI ƯU THANH CÔNG CỤ) ---
 st.markdown("""
 <style>
     /* --- NỀN LIQUID FULL --- */
@@ -55,52 +54,38 @@ st.markdown("""
     .bot-row { display: flex; justify-content: flex-start; width: 100%; margin-bottom: 15px; }
 
     /* --- TỐI ƯU KHU VỰC NHẬP LIỆU DƯỚI ĐÁY --- */
-    .block-container { padding-bottom: 140px !important; } /* Chừa chỗ cho cụm công cụ */
+    .block-container { padding-bottom: 140px !important; }
 
     /* 1. Thanh công cụ (Dán & Tải) */
     .tool-bar-container {
-        display: flex;
-        gap: 10px;
-        margin-bottom: -15px; /* Kéo sát vào thanh chat */
-        z-index: 10; position: relative;
-        padding-left: 10px;
+        display: flex; gap: 10px; margin-bottom: -15px; z-index: 10; position: relative; padding-left: 10px;
     }
     
-    /* Style chung cho nút icon */
-    .tool-icon-btn {
-        width: 40px; height: 40px;
-        border-radius: 50% !important;
-        border: 1px solid rgba(255,255,255,0.3) !important;
-        display: flex; justify-content: center; align-items: center;
-        font-size: 1.2rem; cursor: pointer;
-        backdrop-filter: blur(5px); transition: all 0.3s;
-    }
-    .tool-icon-btn:hover { transform: scale(1.1); border-color: white !important;}
-
-    /* Nút Dán (Paste) - Custom lại thư viện */
+    /* Nút Dán (Paste) */
     button[title="Paste image"] {
         width: 40px !important; height: 40px !important; border-radius: 50% !important;
-        background: rgba(255, 100, 0, 0.5) !important; /* Cam trong suốt */
-        color: transparent !important; /* Ẩn chữ mặc định */
-        position: relative; border: 1px solid rgba(255, 100, 0, 0.8) !important;
+        background: rgba(255, 100, 0, 0.5) !important; 
+        color: transparent !important; border: 1px solid rgba(255, 100, 0, 0.8) !important;
     }
     button[title="Paste image"]::after {
         content: "📋"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2rem;
     }
     
-    /* Nút Tải (Upload) - Biến hình */
-    [data-testid="stFileUploader"] { width: 40px; }
+    /* Nút Tải (Upload) - SỬA LỖI HIỂN THỊ */
+    [data-testid="stFileUploader"] { width: 40px; margin-top: -18px; }
     [data-testid="stFileUploader"] section { padding: 0; background: transparent; border: none; min-height: 0; }
     [data-testid="stFileUploader"] button {
         width: 40px !important; height: 40px !important; border-radius: 50% !important;
-        background: rgba(0, 150, 255, 0.5) !important; /* Xanh trong suốt */
+        background: rgba(0, 150, 255, 0.5) !important;
         color: transparent !important; border: 1px solid rgba(0, 150, 255, 0.8) !important;
         position: relative; padding: 0 !important;
     }
      [data-testid="stFileUploader"] button::after {
         content: "📁"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2rem;
     }
-    [data-testid="stUploadDropzone"] div, [data-testid="stFileUploader"] small { display: none; }
+    /* Ẩn sạch chữ "Drag and drop" */
+    [data-testid="stUploadDropzone"] { display: none; } 
+    [data-testid="stFileUploader"] small { display: none; }
 
     /* 2. Thanh Input Chat */
     .stChatInputContainer { padding-bottom: 20px; }
@@ -112,11 +97,6 @@ st.markdown("""
     .stChatInputContainer textarea {
         border-radius: 28px !important; background: rgba(0, 0, 0, 0.6) !important;
         color: white !important; border: none !important; padding-left: 15px !important;
-    }
-
-    /* Ảnh Preview nhỏ */
-    .preview-img {
-        border-radius: 10px; border: 2px solid #00ff00; margin-left: 10px; margin-bottom: 5px;
     }
 
     /* Title */
@@ -150,7 +130,7 @@ if "chat_session" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# --- 6. LỊCH SỬ CHAT (Container để cuộn) ---
+# --- 6. LỊCH SỬ CHAT ---
 chat_history_container = st.container()
 with chat_history_container:
     for message in st.session_state.messages:
@@ -159,43 +139,42 @@ with chat_history_container:
         else:
             st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div>{message["content"]}</div></div></div>""", unsafe_allow_html=True)
 
-# --- 7. KHU VỰC NHẬP LIỆU TÍCH HỢP (Ở đáy) ---
+# --- 7. KHU VỰC CÔNG CỤ ---
 with st.container():
-    # Hàng công cụ (Nút tròn)
+    # Hàng nút công cụ
     st.markdown('<div class="tool-bar-container">', unsafe_allow_html=True)
     col_tools = st.columns([1, 1, 10])
     img_data = None
     
-    with col_tools[0]: # Nút Dán (Paste)
+    with col_tools[0]: # Nút Dán
         paste_result = paste_image_button(label="📋", background_color="transparent", hover_background_color="transparent")
         if paste_result.image_data is not None:
             img_data = paste_result.image_data
             st.session_state.temp_img = img_data
-            st.toast("Đã dán ảnh! 📋", icon="✅")
+            st.toast("Đã dán ảnh!", icon="✅")
 
-    with col_tools[1]: # Nút Tải (Upload)
-        uploaded_file = st.file_uploader("📁", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
+    with col_tools[1]: # Nút Tải
+        uploaded_file = st.file_uploader("Upload", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
         if uploaded_file:
             img_data = Image.open(uploaded_file)
             st.session_state.temp_img = img_data
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Preview ảnh nếu có (Hiện ngay trên thanh chat)
+    # Preview ảnh (SỬA LỖI Ở ĐÂY: Bỏ className đi)
     current_img = img_data if img_data else st.session_state.get("temp_img", None)
     if current_img:
-        st.image(current_img, width=60, caption="Gửi cái này?", className="preview-img")
+        st.image(current_img, width=80, caption="Gửi cái này?")
 
-# --- 8. THANH CHAT INPUT ---
+# --- 8. GỬI TIN ---
 user_input = st.chat_input("Nhập tin nhắn...")
 
-# XỬ LÝ GỬI
-if user_input or (current_img and user_input is not None): # Chỉ gửi khi bấm Enter ở thanh chat
+if user_input or (current_img and user_input is not None): 
     
     display_text = user_input if user_input else "[Đã gửi một hình ảnh]"
     final_img_to_send = current_img
 
-    # 1. Hiện User (vào container lịch sử)
+    # Hiện User
     with chat_history_container:
         st.markdown(f"""<div class="user-row"><div class="liquid-glass"><span class="icon">🔴</span> <div>{display_text}</div></div></div>""", unsafe_allow_html=True)
         if final_img_to_send:
@@ -203,9 +182,9 @@ if user_input or (current_img and user_input is not None): # Chỉ gửi khi b�
                 st.image(final_img_to_send, width=250)
     
     st.session_state.messages.append({"role": "user", "content": display_text})
-    st.session_state.temp_img = None # Reset ảnh sau khi gửi
+    st.session_state.temp_img = None 
 
-    # 2. Gửi Gemini
+    # Gửi Gemini
     try:
         inputs = []
         if user_input: inputs.append(user_input)
@@ -216,7 +195,7 @@ if user_input or (current_img and user_input is not None): # Chỉ gửi khi b�
             response = st.session_state.chat_session.send_message(inputs)
             bot_reply = response.text
         
-        # 3. Hiện Bot
+        # Hiện Bot
         with chat_history_container:
             st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div>{bot_reply}</div></div></div>""", unsafe_allow_html=True)
         st.session_state.messages.append({"role": "assistant", "content": bot_reply})
