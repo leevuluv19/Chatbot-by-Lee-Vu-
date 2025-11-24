@@ -68,7 +68,7 @@ def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
 # [CẬP NHẬT] Hàm check đăng nhập kiểm tra hạn sử dụng
 def kiem_tra_dang_nhap(input_key, input_sdt):
     # 1. Admin
-    if input_key == ADMIN_PASSWORD:
+    if input_key == SDT_ADMIN:
         return True, "admin", "Chào Sếp Vũ!"
     
     # 2. Khách
@@ -311,7 +311,7 @@ if not st.session_state.logged_in:
     st.markdown("""
         <div class="title-container" style="margin-top: 100px;">
             <div class="main-title">🔒 BẢO MẬT</div>
-            <div class="sub-title">Hệ thống Chatbot Premium</div>
+            <div class="sub-title">Hệ thống "Trí tuệ nhân tạo của Le Vu"</div>
         </div>
     """, unsafe_allow_html=True)
     
