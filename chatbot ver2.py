@@ -8,7 +8,7 @@ from datetime import datetime
 
 # --- CẤU HÌNH ADMIN ---
 FILE_DATA = "key_data.json"
-ADMIN_PASSWORD = "levudepzai" # <--- Đổi pass Admin của bạn ở đây
+ADMIN_PASSWORD = "admin_vu_dep_trai" 
 
 # --- HÀM XỬ LÝ DATA ---
 def load_data():
@@ -26,26 +26,38 @@ def save_data(data):
     with open(FILE_DATA, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
 
-def tao_key_moi(ghi_chu="Khach le"):
+# [CẬP NHẬT] Hàm tạo key có thêm SĐT
+def tao_key_moi(sdt_khach, ghi_chu="Khach le"):
     data = load_data()
     phan_duoi = secrets.token_hex(4).upper() 
     new_key = f"KEY-{phan_duoi[:4]}-{phan_duoi[4:]}"
+    
     data[new_key] = {
         "status": "active",
+        "sdt": sdt_khach, # Lưu SĐT vào hệ thống
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "note": ghi_chu
     }
     save_data(data)
     return new_key
 
-def kiem_tra_dang_nhap(input_key):
+# [CẬP NHẬT] Hàm check đăng nhập yêu cầu cả SĐT
+def kiem_tra_dang_nhap(input_key, input_sdt):
+    # 1. Admin đăng nhập (Không cần SĐT, chỉ cần đúng Pass)
     if input_key == ADMIN_PASSWORD:
         return True, "admin", "Chào Sếp Vũ!"
+    
+    # 2. Khách đăng nhập
     data = load_data()
     if input_key in data:
-        return True, "user", f"Xin chào! (Key: {data[input_key]['note']})"
-    return False, None, "❌ Key không tồn tại hoặc sai!"
-
+        thong_tin = data[input_key]
+        # Kiểm tra xem SĐT nhập vào có khớp với SĐT lúc mua Key không
+        if thong_tin.get("sdt") == input_sdt:
+            return True, "user", f"Xin chào {input_sdt}!"
+        else:
+            return False, None, "❌ Sai số điện thoại đăng ký!"
+            
+    return False, None, "❌ Key không tồn tại!"
 st.set_page_config(page_title="Lê Vũ Depzai", layout="centered")
 
 
@@ -251,26 +263,29 @@ st.markdown("""
     .block-container { padding-bottom: 100px !important; }
 </style>
 """, unsafe_allow_html=True)
-# --- LOGIC CHẶN ĐĂNG NHẬP ---
+# --- LOGIC CHẶN ĐĂNG NHẬP (CÓ SĐT) ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_role" not in st.session_state:
     st.session_state.user_role = None
 
 if not st.session_state.logged_in:
-    # Giao diện màn hình khóa
     st.markdown("""
         <div class="title-container" style="margin-top: 100px;">
-            <div class="main-title">🔒 LOCKED</div>
-            <div class="sub-title">Nhập Key để truy cập Chatbot</div>
+            <div class="main-title">🔒 BẢO MẬT</div>
+            <div class="sub-title">Nhập Key và SĐT để truy cập</div>
         </div>
     """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key của bạn...", label_visibility="collapsed")
-        if st.button("MỞ KHÓA 🚀", use_container_width=True):
-            success, role, msg = kiem_tra_dang_nhap(input_key)
+        # Thêm ô nhập SĐT
+        input_sdt = st.text_input("Số điện thoại:", placeholder="Nhập SĐT của bạn...")
+        input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key...", label_visibility="visible")
+        
+        if st.button("ĐĂNG NHẬP 🚀", use_container_width=True):
+            # Gọi hàm kiểm tra mới
+            success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
             if success:
                 st.session_state.logged_in = True
                 st.session_state.user_role = role
@@ -278,46 +293,27 @@ if not st.session_state.logged_in:
                 st.rerun()
             else:
                 st.error(msg)
-    st.stop() # <--- LỆNH QUAN TRỌNG: Dừng code tại đây nếu chưa login
-# --- 3. TIÊU ĐỀ (NHƯ ẢNH 1) ---
-st.markdown("""
-    <div class="title-container">
-        <div class="main-title"> Lê Vũ Depzai</div>
-        <div class="sub-title">Trí tuệ nhân tạo của Lê Vũ</div>
-    </div>
-""", unsafe_allow_html=True)
-
-# --- 4. CẤU HÌNH API ---
-try:
-    api_key = st.secrets["GOOGLE_API_KEY"]
-    genai.configure(api_key=api_key)
-except Exception:
-    st.error("⚠️ Chưa có chìa khóa! Vào Settings -> Secrets để điền API Key.")
     st.stop()
-
-# --- 5. KHỞI TẠO BOT ---
-if "chat_session" not in st.session_state:
-    model = genai.GenerativeModel('models/gemini-2.0-flash')
-    st.session_state.chat_session = model.start_chat(history=[])
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-# --- PANEL QUẢN LÝ (CHỈ HIỆN VỚI ADMIN) ---
+# --- PANEL QUẢN LÝ (ADMIN MỚI) ---
 if st.session_state.get("user_role") == "admin":
-    with st.expander("🛠️ ADMIN: TẠO KEY KHÁCH HÀNG", expanded=False):
-        c1, c2 = st.columns([3, 1])
+    with st.expander("🛠️ ADMIN: CẤP KEY CHO SĐT", expanded=False):
+        c1, c2, c3 = st.columns([2, 2, 1])
         with c1:
-            note_input = st.text_input("Ghi chú khách hàng", placeholder="VD: Khách VIP A")
+            sdt_input = st.text_input("SĐT Khách hàng", placeholder="VD: 0912xxx")
         with c2:
-            st.write("") # Căn lề
+            note_input = st.text_input("Ghi chú", placeholder="VD: Khách Vip Tháng 12")
+        with c3:
             st.write("") 
-            btn_create = st.button("Tạo Key")
+            st.write("") 
+            btn_create = st.button("Tạo Key", use_container_width=True)
         
         if btn_create:
-            k = tao_key_moi(note_input)
-            st.success(f"Key vừa tạo: {k}")
-            st.code(k, language="text")
-# --- 6. LỊCH SỬ CHAT (STYLE NHƯ ẢNH 3) ---
+            if sdt_input:
+                k = tao_key_moi(sdt_input, note_input)
+                st.success(f"✅ Đã tạo cho {sdt_input}")
+                st.code(k, language="text")
+            else:
+                st.warning("Vui lòng nhập SĐT khách!")
 # Tạo container để chứa lịch sử chat, nằm bên trên khu vực nhập liệu
 chat_container = st.container()
 with chat_container:
