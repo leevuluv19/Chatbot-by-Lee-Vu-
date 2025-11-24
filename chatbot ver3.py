@@ -2,46 +2,106 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
-# --- 1. CẤU HÌNH TRANG WEB ---
+
 st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
 
-# --- 2. CSS SIÊU CẤP: NỀN ẢNH 1 + CHAT STYLE ẢNH 3 ---
+
 st.markdown("""
 <style>
-    /* ================= GIỮ NGUYÊN NHƯ ẢNH 1 ================= */
-    /* --- Nền Full Màn Hình --- */
     [data-testid="stAppViewContainer"] {
-        background-image: url("https://sf-static.upanhlaylink.com/img/image_20251124438d8e9e8b4c9f6712b854f513430f8d.jpg"); /* Ảnh nền chất lừ */
+        background-image: url("https://sf-static.upanhlaylink.com/img/image_20251124438d8e9e8b4c9f6712b854f513430f8d.jpg"); 
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         background-attachment: fixed;
     }
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
-    /* Lớp phủ tối để làm nổi bật nội dung */
     [data-testid="stAppViewContainer"]::before {
         content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0, 0, 0, 0.4); z-index: -1; pointer-events: none;
     }
-
-    /* --- Tiêu đề --- */
     .title-container { text-align: center; margin-bottom: 30px; margin-top: -20px; }
     .main-title { font-size: 2.5rem; font-weight: 800; color: white; text-shadow: 0 0 15px rgba(255,255,255,0.4); }
     .sub-title { font-size: 1rem; color: rgba(255,255,255,0.8); letter-spacing: 1px; }
 
-    /* Ẩn các thành phần thừa */
+
     #MainMenu, footer {visibility: hidden;}
     .stChatMessageAvatarBackground {display: none !important;}
     .stChatMessage {background: transparent !important; border: none !important;}
 
- /* --- KHUNG CHAT SIÊU TRONG SUỐT (ULTRA CLEAR) --- */
+            /* --- VIỀN NEON 7 MÀU CHẠY (MỎNG NHƯNG TỎA SÁNG MẠNH) --- */
+    
+    /* LỚP 1: SỢI DÂY NGUỒN (Nét căng, chạy màu) */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 9999;
+        pointer-events: none;
+        
+        padding: 4px; /* ĐỘ DÀY VIỀN CHỈ 4PX THÔI */
+        
+        background: conic-gradient(
+            from var(--angle), 
+            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
+        );
+        
+        animation: spin 4s linear infinite;
+        
+        /* Mask để đục thủng giữa */
+        -webkit-mask: 
+           linear-gradient(#fff 0 0) content-box, 
+           linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+    }
+    
+    /* LỚP 2: ÁNH SÁNG TỎA RA (GLOW) */
+    body::after {
+        content: "";
+        position: fixed;
+        /* Phủ trùm lên viền chính */
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 9998;
+        pointer-events: none;
+        
+        padding: 4px; /* Dày bằng viền chính */
+        
+        background: conic-gradient(
+            from var(--angle), 
+            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
+        );
+        
+        animation: spin 4s linear infinite;
+        
+        -webkit-mask: 
+           linear-gradient(#fff 0 0) content-box, 
+           linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+
+        /* ĐÂY LÀ PHÉP THUẬT: Làm nhòe cực mạnh để tạo sương */
+        filter: blur(20px); 
+        opacity: 1; /* Tăng độ sáng lên tối đa */
+    }
+    /* ẨN GIAO DIỆN CŨ */
+    #MainMenu, footer, header {visibility: hidden;}
+    .stChatMessageAvatarBackground {display: none !important;}
+    .stChatMessage {background: transparent !important; border: none !important;}
+
+    /* --- ANIMATION GÓC XOAY --- */
+    @property --angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+    @keyframes spin {
+        to { --angle: 360deg; }
+    }
     .liquid-glass {
         position: relative;
+        background: rgba(255, 255, 255, 0.001); 
         
-        /* CHỈNH ĐỘ TRONG Ở ĐÂY: Để 0.01 là gần như tàng hình */
-        background: rgba(255, 255, 255, 0.01); 
-        
-        /* Blur nhẹ hơn để nhìn rõ nền */
         backdrop-filter: blur(2px); 
         -webkit-backdrop-filter: blur(2px);
         
@@ -53,31 +113,26 @@ st.markdown("""
         display: flex; align-items: center;
         z-index: 1;
         
-        /* Viền kính siêu mỏng */
         border: 1px solid rgba(255,255,255,0.05);
         
         width: fit-content; max-width: 85%;
     }
-
-    /* --- VIỀN 7 MÀU XOAY LIỀN MẠCH (KHÔNG NGẮT QUÃNG) --- */
     .liquid-glass::before {
         content: "";
         position: absolute;
-        inset: 0; /* Phủ kín khung */
+        inset: 0;
         z-index: -1;
         border-radius: 35px; 
-        padding: 2px; /* ĐỘ DÀY VIỀN */
+        padding: 2px;
         
-        /* Dải màu LIỀN MẠCH (Full Circle) */
         /* Quan trọng: Màu đầu (#00C6FF) và màu cuối (#00C6FF) PHẢI GIỐNG NHAU để xoay không bị giật */
         background: conic-gradient(
             from var(--angle), 
             #00C6FF, #0072FF, #8E2DE2, #F80759, #FF8C00, #E0C3FC, #00C6FF
         );
         
-        animation: spin 6s linear infinite; /* Xoay đều 4 giây 1 vòng */
+        animation: spin 6s linear infinite;
         
-        /* Kỹ thuật Mask: Chỉ hiện viền */
         -webkit-mask: 
            linear-gradient(#fff 0 0) content-box, 
            linear-gradient(#fff 0 0);
