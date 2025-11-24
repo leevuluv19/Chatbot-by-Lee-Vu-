@@ -34,60 +34,74 @@ st.markdown("""
     .stChatMessageAvatarBackground {display: none !important;}
     .stChatMessage {background: transparent !important; border: none !important;}
 
-    /* --- STYLE KHUNG CHAT MỚI (NHƯ ẢNH SẾP GỬI) --- */
+ /* --- KHUNG CHAT SIÊU TRONG SUỐT (ULTRA CLEAR) --- */
     .liquid-glass {
         position: relative;
-        background: rgba(255, 255, 255, 0.05); 
-        backdrop-filter: blur(20px); 
-        -webkit-backdrop-filter: blur(20px);
         
-        border-radius: 50px; 
+        /* CHỈNH ĐỘ TRONG Ở ĐÂY: Để 0.01 là gần như tàng hình */
+        background: rgba(255, 255, 255, 0.01); 
+        
+        /* Blur nhẹ hơn để nhìn rõ nền */
+        backdrop-filter: blur(2px); 
+        -webkit-backdrop-filter: blur(2px);
+        
+        border-radius: 35px;
         padding: 12px 25px;
-        margin-bottom: 20px;
-        color: #ffffff;
+        margin-bottom: 15px;
+        color: white;
         font-weight: 500;
-        display: flex;
-        align-items: center;
+        display: flex; align-items: center;
         z-index: 1;
-        width: fit-content;
-        max-width: 85%;
-        overflow: visible !important;
         
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        /* Viền kính siêu mỏng */
+        border: 1px solid rgba(255,255,255,0.05);
+        
+        width: fit-content; max-width: 85%;
     }
 
-    /* LỚP GLOW CẦU VỒNG TỎA RA XUNG QUANH (::before) */
+    /* --- VIỀN 7 MÀU XOAY LIỀN MẠCH (KHÔNG NGẮT QUÃNG) --- */
     .liquid-glass::before {
         content: "";
         position: absolute;
-        inset: -2px; 
-        border-radius: 50px; 
+        inset: 0; /* Phủ kín khung */
         z-index: -1;
+        border-radius: 35px; 
+        padding: 2px; /* ĐỘ DÀY VIỀN */
         
-        background: linear-gradient(
-            45deg, 
-            #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000
+        /* Dải màu LIỀN MẠCH (Full Circle) */
+        /* Quan trọng: Màu đầu (#00C6FF) và màu cuối (#00C6FF) PHẢI GIỐNG NHAU để xoay không bị giật */
+        background: conic-gradient(
+            from var(--angle), 
+            #00C6FF, #0072FF, #8E2DE2, #F80759, #FF8C00, #E0C3FC, #00C6FF
         );
-        background-size: 400%;
         
-        animation: rainbow-spin 10s linear infinite;
+        animation: spin 6s linear infinite; /* Xoay đều 4 giây 1 vòng */
         
-        filter: blur(10px); 
-        opacity: 0.6;
+        /* Kỹ thuật Mask: Chỉ hiện viền */
+        -webkit-mask: 
+           linear-gradient(#fff 0 0) content-box, 
+           linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        
+        /* Glow nhẹ */
+        filter: blur(10px);
     }
     
-    /* LỚP VIỀN SẮC NÉT BÊN DƯỚI (::after) */
+    /* Lớp Glow loe sáng bên ngoài */
     .liquid-glass::after {
         content: "";
         position: absolute;
-        inset: -1px; 
-        border-radius: 50px;
-        z-index: -2;
-        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-        background-size: 400%;
-        animation: rainbow-spin 10s linear infinite;
-        opacity: 0.8;
+        inset: -4px;
+        z-index: -4;
+        border-radius: 35px;
+        background: conic-gradient(
+            from var(--angle), 
+            #00C6FF, #0072FF, #8E2DE2, #F80759, #FF8C00, #E0C3FC, #00C6FF
+        );
+        animation: spin 4s linear infinite;
+        filter: blur(20px); /* Độ loe sáng */
+        opacity: 0.7;
     }
 
     /* Căn chỉnh hàng chat */
