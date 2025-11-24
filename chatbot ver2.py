@@ -27,7 +27,7 @@ if "chat_session" not in st.session_state:
 # --- CẤU HÌNH ADMIN ---
 FILE_DATA = "key_data.json"
 SDT_ADMIN = "0376274345"
-ADMIN_PASSWORD = "admin_vu_dep_trai" 
+ADMIN_PASSWORD = "levudepzai" 
 
 # --- HÀM XỬ LÝ DATA ---
 def load_data():
@@ -68,7 +68,7 @@ def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
 # [CẬP NHẬT] Hàm check đăng nhập kiểm tra hạn sử dụng
 def kiem_tra_dang_nhap(input_key, input_sdt):
     # 1. Admin
-    if input_key == SDT_ADMIN:
+    if input_key == ADMIN_PASSWORD:
         return True, "admin", "Chào Sếp Vũ!"
     
     # 2. Khách
