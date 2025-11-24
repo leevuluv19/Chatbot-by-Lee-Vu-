@@ -32,8 +32,8 @@ st.markdown("""
         
         /* Nền kính trong suốt (Đen mờ 5%) */
         background: rgba(0, 0, 0, 0.3); 
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(100px);
+        -webkit-backdrop-filter: blur(100px);
         
         border-radius: 25px;
         padding: 15px 25px;
