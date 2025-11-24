@@ -66,7 +66,7 @@ st.markdown("""
         inset: 0;             /* Phủ kín khung */
         border-radius: 25px;  /* Bo góc cho khớp */
         padding: 2px;         /* ĐỘ DÀY VIỀN */
-        filter: blur(100px);
+        filter: blur(0px);
         /* Dải màu hình nón: Đuôi trong suốt (transparent) -> Đầu 7 màu */
         background: conic-gradient(
             from var(--angle), 
