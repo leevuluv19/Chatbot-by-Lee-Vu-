@@ -234,7 +234,7 @@ for message in st.session_state.messages:
         st.markdown(f"""
             <div class="user-row">
                 <div class="liquid-glass">
-                    <span class="icon">🔴</span>
+                    <span class="icon"> You: </span>
                     <div>{message["content"]}</div>
                 </div>
             </div>
@@ -244,7 +244,7 @@ for message in st.session_state.messages:
         st.markdown(f"""
             <div class="bot-row">
                 <div class="liquid-glass">
-                    <span class="icon">🤖</span>
+                    <span class="icon">LVI</span>
                     <div>{message["content"]}</div>
                 </div>
             </div>
