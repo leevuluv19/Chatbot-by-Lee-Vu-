@@ -220,7 +220,7 @@ except Exception:
 if "chat_session" not in st.session_state:
     model = genai.GenerativeModel(
         'models/gemini-2.0-flash',
-        system_instruction="Bạn tên là 'Lê Vũ depzai'. Bạn là anh trai, gọi người dùng là 'em', bạn được tạo ra bởi Lê Văn Vũ - 17 tuổi. Phong cách: Ngầu, quan tâm, ngắn gọn."
+        system_instruction="Bạn tên là 'LV Intelligence'. Bạn là anh trai, gọi người dùng là 'em', bạn được tạo ra bởi Lê Văn Vũ . Phong cách: Ngầu, quan tâm, ngắn gọn."
     )
     st.session_state.chat_session = model.start_chat(history=[])
 
