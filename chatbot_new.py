@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # --- 1. CẤU HÌNH TRANG WEB ---
-st.set_page_config(page_title="Lê Vũ AI", page_icon="", layout="centered")
+st.set_page_config(page_title="Le Vu AI", page_icon="", layout="centered")
 
 # --- 2. CSS SIÊU CẤP (KÍNH TÀNG HÌNH + XOAY LIỀN MẠCH) ---
 st.markdown("""
@@ -46,8 +46,8 @@ st.markdown("""
         background: rgba(255, 255, 255, 0.01); 
         
         /* Blur nhẹ hơn để nhìn rõ nền */
-        backdrop-filter: blur(5px); 
-        -webkit-backdrop-filter: blur(5px);
+        backdrop-filter: blur(2px); 
+        -webkit-backdrop-filter: blur(2px);
         
         border-radius: 35px;
         padding: 12px 25px;
@@ -79,7 +79,7 @@ st.markdown("""
             #00C6FF, #0072FF, #8E2DE2, #F80759, #FF8C00, #E0C3FC, #00C6FF
         );
         
-        animation: spin 4s linear infinite; /* Xoay đều 4 giây 1 vòng */
+        animation: spin 6s linear infinite; /* Xoay đều 4 giây 1 vòng */
         
         /* Kỹ thuật Mask: Chỉ hiện viền */
         -webkit-mask: 
@@ -89,22 +89,22 @@ st.markdown("""
         mask-composite: exclude;
         
         /* Glow nhẹ */
-        filter: blur(1px);
+        filter: blur(10px);
     }
     
     /* Lớp Glow loe sáng bên ngoài */
     .liquid-glass::after {
         content: "";
         position: absolute;
-        inset: -2px;
-        z-index: -2;
+        inset: -4px;
+        z-index: -4;
         border-radius: 35px;
         background: conic-gradient(
             from var(--angle), 
             #00C6FF, #0072FF, #8E2DE2, #F80759, #FF8C00, #E0C3FC, #00C6FF
         );
         animation: spin 4s linear infinite;
-        filter: blur(10px); /* Độ loe sáng */
+        filter: blur(20px); /* Độ loe sáng */
         opacity: 0.7;
     }
 
@@ -149,7 +149,7 @@ st.markdown("""
 # --- 3. GIAO DIỆN TIÊU ĐỀ ---
 st.markdown("""
     <div class="title-container">
-        <div class="main-title">Lê Vũ Intelligence</div>
+        <div class="main-title">Le Vu Intelligence</div>
         <div class="sub-title">Designed by Le Van Vu</div>
     </div>
 """, unsafe_allow_html=True)
