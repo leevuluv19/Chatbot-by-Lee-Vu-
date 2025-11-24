@@ -22,9 +22,9 @@ st.markdown("""
         background: rgba(0, 0, 0, 0.2); /* Nền tối nhẹ */
         z-index: -1; pointer-events: none;
     }
-/* --- VIỀN 7 MÀU CHẠY HÌNH CHỮ NHẬT (ĐÈN NEON SẮC NÉT) --- */
+/* --- VIỀN SƯƠNG MÙ 7 MÀU (FOGGY RAINBOW) --- */
     
-    /* LỚP 1: ĐƯỜNG LINE SẮC NÉT (Dây tóc bóng đèn) */
+    /* LỚP 1: LÕI SƯƠNG (Đậm hơn, sát mép) */
     body::before {
         content: "";
         position: fixed;
@@ -32,34 +32,7 @@ st.markdown("""
         z-index: 9999;
         pointer-events: none;
         
-        /* Viền mỏng 3px thôi cho tinh tế */
-        padding: 3px; 
-        
-        background: conic-gradient(
-            from var(--angle), 
-            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
-        );
-        
-        animation: spin 4s linear infinite;
-        
-        /* Đục thủng giữa (Mask) - Giữ lại viền sắc nét */
-        -webkit-mask: 
-           linear-gradient(#fff 0 0) content-box, 
-           linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-    }
-    
-    /* LỚP 2: ÁNH SÁNG TỎA RA (GLOW) - Chỉnh lại cho đỡ bị mù sương */
-    body::after {
-        content: "";
-        position: fixed;
-        /* Đẩy lùi ra ngoài mép màn hình nhiều hơn (-10px) để ánh sáng chỉ hắt vào cạnh */
-        top: -5px; left: -5px; right: -5px; bottom: -5px;
-        z-index: 9998;
-        pointer-events: none;
-        
-        /* Viền glow dày hơn chút để có chỗ loe */
+        /* Tăng độ dày lên để sương có độ "đầm" */
         padding: 10px; 
         
         background: conic-gradient(
@@ -69,16 +42,42 @@ st.markdown("""
         
         animation: spin 4s linear infinite;
         
-        /* Đục thủng */
+        -webkit-mask: 
+           linear-gradient(#fff 0 0) content-box, 
+           linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        
+        /* ĐÂY LÀ CHÌA KHÓA: Làm nhòe mạnh ngay từ lớp chính */
+        filter: blur(15px); 
+        opacity: 0.8;
+    }
+    
+    /* LỚP 2: HƠI SƯƠNG LAN TỎA (Nhạt hơn, loe rộng) */
+    body::after {
+        content: "";
+        position: fixed;
+        /* Loe rộng ra ngoài màn hình rất nhiều */
+        top: -30px; left: -30px; right: -30px; bottom: -30px;
+        z-index: 9998;
+        pointer-events: none;
+        
+        background: conic-gradient(
+            from var(--angle), 
+            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
+        );
+        
+        animation: spin 4s linear infinite;
+        
         -webkit-mask: 
            linear-gradient(#fff 0 0) content-box, 
            linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
 
-        /* Độ mờ: 20px là vừa đẹp, không bị che nội dung */
-        filter: blur(20px);
-        opacity: 0.8;
+        /* Blur cực mạnh để tạo cảm giác như khói/sương */
+        filter: blur(50px); 
+        opacity: 0.5;
     }
     /* ẨN GIAO DIỆN CŨ */
     #MainMenu, footer, header {visibility: hidden;}
