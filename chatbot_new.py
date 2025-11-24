@@ -4,20 +4,21 @@ import google.generativeai as genai
 # --- 1. CẤU HÌNH TRANG WEB ---
 st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
 
-# --- 2. CSS SIÊU CẤP (NỀN MỚI + VIỀN 7 MÀU CHẠY + NỀN TRONG SUỐT) ---
+# --- 2. CSS SIÊU CẤP (LIQUID GLASS THỰC SỰ + VIỀN APPLE CHẠY) ---
 st.markdown("""
 <style>
-    /* 1. NỀN LIQUID DARK (Link ảnh Sếp gửi) */
+    /* 1. NỀN LIQUID (Ảnh chất lỏng) */
     .stApp {
         background-image: url("https://sf-static.upanhlaylink.com/img/image_20251124438d8e9e8b4c9f6712b854f513430f8d.jpg");
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
+        background-position: center;
     }
-    /* Lớp phủ tối */
+    /* Lớp phủ tối mờ để chữ dễ đọc */
     .stApp::before {
         content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.4); z-index: -1;
+        background: rgba(0, 0, 0, 0.3); z-index: -1;
     }
 
     /* 2. ẨN GIAO DIỆN CŨ */
@@ -25,8 +26,8 @@ st.markdown("""
     .stChatMessageAvatarBackground {display: none !important;}
     .stChatMessage {background: transparent !important; border: none !important;}
 
-    /* --- 3. TẠO CHUYỂN ĐỘNG 7 MÀU (KEYFRAMES) --- */
-    @keyframes rainbow-run {
+    /* --- 3. ANIMATION VIỀN CHẠY --- */
+    @keyframes rainbow-border {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
@@ -35,8 +36,11 @@ st.markdown("""
     /* --- 4. STYLE KHUNG CHAT (GLASS TRONG SUỐT + VIỀN CHẠY) --- */
     .liquid-glass {
         position: relative;
-        /* Nền kính trong suốt mờ */
-        background: rgba(255, 255, 255, 0.05); 
+        
+        /* QUAN TRỌNG: Nền đen trong suốt (Alpha = 0.5) */
+        background-color: rgba(0, 0, 0, 0.5); 
+        
+        /* Hiệu ứng kính mờ background */
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
         
@@ -47,47 +51,55 @@ st.markdown("""
         font-weight: 500;
         display: flex;
         align-items: center;
-        z-index: 1; /* Để đè lên viền */
-        border: 2px solid transparent; /* Viền trong suốt để định hình */
+        z-index: 1;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
-    /* TẠO VIỀN GIẢ CHẠY BÊN DƯỚI (Dùng ::before) */
+    /* TẠO VIỀN 7 MÀU CHẠY (Lớp lót bên dưới) */
     .liquid-glass::before {
         content: "";
         position: absolute;
-        /* Inset âm để tạo độ dày cho viền (2px) */
+        /* Inset -2px nghĩa là viền dư ra 2px */
         top: -2px; left: -2px; right: -2px; bottom: -2px;
-        z-index: -1; /* Nằm dưới nội dung chat */
+        z-index: -1; /* Nằm dưới khung chat */
         border-radius: 22px; 
         
-        /* Dải màu cầu vồng */
-        background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+        /* Dải màu Apple Intelligence */
+        background: linear-gradient(
+            45deg, 
+            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
+        );
         background-size: 400%;
         
         /* Kích hoạt chạy */
-        animation: rainbow-run 5s linear infinite;
+        animation: rainbow-border 5s linear infinite;
         
-        /* Tạo hiệu ứng phát sáng (Glow) nhẹ cho viền */
-        filter: blur(1px);
-        opacity: 0.9;
+        /* Làm nhòe viền để tạo hiệu ứng Glow (Phát sáng) */
+        filter: blur(2px);
+        opacity: 0.8;
     }
 
     .icon {
         margin-right: 15px; font-size: 1.5rem;
-        filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+        filter: drop-shadow(0 0 2px rgba(255,255,255,0.8));
     }
 
-    /* KHUNG INPUT CŨNG CHẠY LUÔN */
+    /* CĂN CHỈNH TRÁI - PHẢI */
+    .user-row { display: flex; justify-content: flex-end; }
+    .bot-row { display: flex; justify-content: flex-start; }
+
+    /* KHUNG INPUT CŨNG TRONG SUỐT + VIỀN CHẠY */
     .stChatInputContainer { padding: 20px 0; }
     .stChatInputContainer > div {
-        position: relative; border-radius: 30px; padding: 3px;
+        position: relative; border-radius: 30px; padding: 2px;
         background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
         background-size: 400%;
-        animation: rainbow-run 3s linear infinite;
+        animation: rainbow-border 3s linear infinite;
     }
     .stChatInputContainer textarea {
         border-radius: 28px !important;
-        background: rgba(0, 0, 0, 0.7) !important; /* Nền input tối hơn chút để dễ nhìn chữ */
+        /* Nền input đen trong suốt */
+        background-color: rgba(0, 0, 0, 0.6) !important;
         color: white !important; border: none !important;
         backdrop-filter: blur(10px);
     }
@@ -132,17 +144,21 @@ if "messages" not in st.session_state:
 # --- 6. HIỂN THỊ LỊCH SỬ ---
 for message in st.session_state.messages:
     if message["role"] == "user":
-        # Sếp chat
+        # Sếp chat -> Căn phải
         st.markdown(f"""
-            <div class="liquid-glass">
-                <span class="icon">🔴</span> {message["content"]}
+            <div class="user-row">
+                <div class="liquid-glass">
+                    <span class="icon">🔴</span> {message["content"]}
+                </div>
             </div>
         """, unsafe_allow_html=True)
     else:
-        # Bot chat
+        # Bot chat -> Căn trái
         st.markdown(f"""
-            <div class="liquid-glass">
-                <span class="icon">🤖</span> {message["content"]}
+            <div class="bot-row">
+                <div class="liquid-glass">
+                    <span class="icon">🤖</span> {message["content"]}
+                </div>
             </div>
         """, unsafe_allow_html=True)
 
@@ -150,20 +166,26 @@ for message in st.session_state.messages:
 user_input = st.chat_input("Nói gì với anh đi em...")
 
 if user_input:
+    # User
     st.markdown(f"""
-        <div class="liquid-glass">
-            <span class="icon">🔴</span> {user_input}
+        <div class="user-row">
+            <div class="liquid-glass">
+                <span class="icon">🔴</span> {user_input}
+            </div>
         </div>
     """, unsafe_allow_html=True)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
+    # Bot
     try:
         response = st.session_state.chat_session.send_message(user_input)
         bot_reply = response.text
         
         st.markdown(f"""
-            <div class="liquid-glass">
-                <span class="icon">🤖</span> {bot_reply}
+            <div class="bot-row">
+                <div class="liquid-glass">
+                    <span class="icon">🤖</span> {bot_reply}
+                </div>
             </div>
         """, unsafe_allow_html=True)
         st.session_state.messages.append({"role": "assistant", "content": bot_reply})
