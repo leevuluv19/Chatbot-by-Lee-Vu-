@@ -8,7 +8,7 @@ from datetime import datetime
 
 # --- CẤU HÌNH ADMIN ---
 FILE_DATA = "key_data.json"
-ADMIN_PASSWORD = "admin_vu_dep_trai" # <--- Đổi pass Admin của bạn ở đây
+ADMIN_PASSWORD = "levudepzai" # <--- Đổi pass Admin của bạn ở đây
 
 # --- HÀM XỬ LÝ DATA ---
 def load_data():
