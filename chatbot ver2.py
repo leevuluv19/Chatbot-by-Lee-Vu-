@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 
 # --- CẤU HÌNH ADMIN ---
 FILE_DATA = "key_data.json"
+SDT_ADMIN = "0376274345"
 ADMIN_PASSWORD = "admin_vu_dep_trai" 
 
 # --- HÀM XỬ LÝ DATA ---
