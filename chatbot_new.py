@@ -22,46 +22,19 @@ st.markdown("""
         background: rgba(0, 0, 0, 0.2); /* Nền tối nhẹ */
         z-index: -1; pointer-events: none;
     }
-/* --- VIỀN 7 MÀU CHẠY HÌNH CHỮ NHẬT BAO QUANH MÀN HÌNH --- */
+/* --- VIỀN 7 MÀU CHẠY HÌNH CHỮ NHẬT (ĐÈN NEON SẮC NÉT) --- */
     
-    /* Lớp 1: Đường line sắc nét chạy màu */
+    /* LỚP 1: ĐƯỜNG LINE SẮC NÉT (Dây tóc bóng đèn) */
     body::before {
         content: "";
-        position: fixed; /* Cố định khung nhìn */
-        top: 0; left: 0; right: 0; bottom: 0; /* Bao kín màn hình */
-        z-index: 9999; /* Nằm trên cùng mọi thứ */
-        pointer-events: none; /* Quan trọng: để chuột bấm xuyên qua được */
-        
-        padding: 4px; /* ĐỘ DÀY của đường line viền */
-        border-radius: 0px; /* Hình chữ nhật góc vuông (không bo) */
-        
-        /* Dải 7 màu cầu vồng rực rỡ chạy liền mạch */
-        background: conic-gradient(
-            from var(--angle), 
-            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
-        );
-        
-        /* Sử dụng lại animation xoay có sẵn */
-        animation: spin 4s linear infinite; 
-        
-        /* Kỹ thuật Mask: Đục thủng giữa để chỉ còn lại viền */
-        -webkit-mask: 
-           linear-gradient(#fff 0 0) content-box, 
-           linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-    }
-    
-    /* Lớp 2: Hiệu ứng phát sáng mờ mờ (Glow) loe ra ngoài */
-    body::after {
-        content: "";
         position: fixed;
-        /* Loe ra ngoài khung hình một chút (-10px) để tạo hiệu ứng ánh sáng */
-        top: -10px; left: -10px; right: -10px; bottom: -10px;
-        z-index: 9998; /* Nằm ngay dưới lớp viền chính */
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 9999;
         pointer-events: none;
         
-        /* Màu nền y hệt lớp trên */
+        /* Viền mỏng 3px thôi cho tinh tế */
+        padding: 3px; 
+        
         background: conic-gradient(
             from var(--angle), 
             #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
@@ -69,9 +42,43 @@ st.markdown("""
         
         animation: spin 4s linear infinite;
         
-        /* ĐÂY LÀ CHỖ CHỈNH ĐỘ MỜ MỜ ẢO ẢO */
-        filter: blur(25px); /* Blur càng to càng ảo */
-        opacity: 0.6; /* Độ trong suốt của ánh sáng */
+        /* Đục thủng giữa (Mask) - Giữ lại viền sắc nét */
+        -webkit-mask: 
+           linear-gradient(#fff 0 0) content-box, 
+           linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+    }
+    
+    /* LỚP 2: ÁNH SÁNG TỎA RA (GLOW) - Chỉnh lại cho đỡ bị mù sương */
+    body::after {
+        content: "";
+        position: fixed;
+        /* Đẩy lùi ra ngoài mép màn hình nhiều hơn (-10px) để ánh sáng chỉ hắt vào cạnh */
+        top: -5px; left: -5px; right: -5px; bottom: -5px;
+        z-index: 9998;
+        pointer-events: none;
+        
+        /* Viền glow dày hơn chút để có chỗ loe */
+        padding: 10px; 
+        
+        background: conic-gradient(
+            from var(--angle), 
+            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
+        );
+        
+        animation: spin 4s linear infinite;
+        
+        /* Đục thủng */
+        -webkit-mask: 
+           linear-gradient(#fff 0 0) content-box, 
+           linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+
+        /* Độ mờ: 20px là vừa đẹp, không bị che nội dung */
+        filter: blur(20px);
+        opacity: 0.8;
     }
     /* ẨN GIAO DIỆN CŨ */
     #MainMenu, footer, header {visibility: hidden;}
