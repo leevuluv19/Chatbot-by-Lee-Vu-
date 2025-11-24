@@ -5,7 +5,7 @@ from PIL import Image
 # --- 1. CẤU HÌNH TRANG WEB ---
 st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
 
-# --- 2. CSS SIÊU CẤP (LIQUID GLASS + NEON BORDER + FULL MÀN HÌNH) ---
+# --- 2. CSS SIÊU CẤP (LIQUID GLASS + NEON BORDER + FULL MÀN HÌNH + FILE UPLOAD STYLE) ---
 st.markdown("""
 <style>
     /* --- FIX NỀN FULL 100% KHÔNG CÓ VIỀN TRẮNG --- */
@@ -30,7 +30,7 @@ st.markdown("""
             padding-left: 0.5rem !important;
             padding-right: 0.5rem !important;
             padding-top: 1rem !important;
-            padding-bottom: 6rem !important;
+            padding-bottom: 8rem !important; /* Tăng padding bottom để chứa thêm nút upload */
         }
         .liquid-glass { max-width: 90% !important; }
     }
@@ -91,7 +91,7 @@ st.markdown("""
     .bot-row { display: flex; justify-content: flex-start; padding-left: 5px; }
 
     /* --- KHUNG NHẬP LIỆU --- */
-    .stChatInputContainer { padding-bottom: 30px; }
+    .stChatInputContainer { padding-bottom: 10px; } /* Giảm padding để nút upload gần hơn */
     .stChatInputContainer > div {
         position: relative; border-radius: 35px; padding: 2px;
         background: conic-gradient(from var(--angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
@@ -102,8 +102,49 @@ st.markdown("""
         color: white !important; border: none !important; backdrop-filter: blur(10px);
     }
     
-    /* Style nút Upload ảnh */
-    .stFileUploader { padding: 10px; background: rgba(255,255,255,0.1); border-radius: 15px; backdrop-filter: blur(5px); }
+    /* --- STYLE CHO KHUNG TẢI ẢNH (CUSTOM FILE UPLOADER) --- */
+    .custom-file-upload {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin-top: -5px;
+        margin-bottom: 10px;
+        padding: 5px 0;
+    }
+
+    /* Biến cái file uploader mặc định thành một nút nhỏ gọn */
+    .stFileUploader {
+        width: auto !important;
+    }
+    .stFileUploader > div {
+        padding: 5px 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    .stFileUploader > div:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: white;
+    }
+    /* Ẩn label "Drag and drop..." mặc định */
+    .stFileUploader span {
+        font-size: 0.9rem;
+    }
+    .stFileUploader small {
+        display: none;
+    }
+    /* Ẩn icon upload mặc định */
+    .stFileUploader div[data-testid="stUploadDropzone"] > div:first-child {
+        display: none;
+    }
+
 
     /* TIÊU ĐỀ */
     .title-container { text-align: center; margin-bottom: 20px; margin-top: -30px; }
@@ -139,15 +180,7 @@ if "chat_session" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# --- 6. NÚT GỬI ẢNH ---
-with st.expander("📸 Gửi ảnh (Bấm để mở)"):
-    uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg", "png", "jpeg"])
-    image_to_send = None
-    if uploaded_file:
-        image_to_send = Image.open(uploaded_file)
-        st.image(image_to_send, width=200, caption="Ảnh đã chọn")
-
-# --- 7. HIỂN THỊ LỊCH SỬ CHAT ---
+# --- 6. HIỂN THỊ LỊCH SỬ CHAT ---
 for message in st.session_state.messages:
     if message["role"] == "user":
         st.markdown(f"""
@@ -166,10 +199,28 @@ for message in st.session_state.messages:
             </div>
         """, unsafe_allow_html=True)
 
-# --- 8. XỬ LÝ GỬI TIN ---
-user_input = st.chat_input("Nói gì với anh đi em...")
+# --- 7. XỬ LÝ GỬI TIN VÀ TẢI ẢNH ---
 
-# Logic gửi: Bấm Enter hoặc bấm nút "Gửi ảnh ngay"
+# Nơi chứa thanh chat và nút tải ảnh
+chat_container = st.container()
+
+with chat_container:
+    # 7.1. Thanh chat
+    user_input = st.chat_input("Nói gì với anh đi em...")
+    
+    # 7.2. Nút tải ảnh (nằm ngay dưới thanh chat)
+    st.markdown('<div class="custom-file-upload">', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("🖼️ Tải ảnh lên", type=["jpg", "png", "jpeg"], label_visibility="visible")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Xử lý logic gửi
+image_to_send = None
+if uploaded_file:
+    image_to_send = Image.open(uploaded_file)
+    # Hiển thị ảnh đã chọn (preview)
+    with st.chat_message("user", avatar=None):
+        st.image(image_to_send, width=200, caption="Ảnh đã chọn")
+
 send_button = False
 if image_to_send: 
     send_button = st.button("Gửi ảnh ngay")
@@ -187,8 +238,8 @@ if user_input or (image_to_send and send_button):
         </div>
     """, unsafe_allow_html=True)
     
-    # 2. Hiện ảnh
-    if image_to_send:
+    # 2. Hiện ảnh (nếu có và user bấm gửi)
+    if image_to_send and send_button:
         with st.chat_message("user", avatar=None):
             st.image(image_to_send, width=250)
 
@@ -202,11 +253,12 @@ if user_input or (image_to_send and send_button):
         else:
             inputs.append("Hãy nhận xét về bức ảnh này.")
             
-        if image_to_send:
+        if image_to_send and send_button:
             inputs.append(image_to_send)
 
-        response = st.session_state.chat_session.send_message(inputs)
-        bot_reply = response.text
+        with st.spinner("Đang xử lý..."):
+            response = st.session_state.chat_session.send_message(inputs)
+            bot_reply = response.text
         
         # 4. Hiện Bot
         st.markdown(f"""
