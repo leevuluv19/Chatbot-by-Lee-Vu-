@@ -4,69 +4,77 @@ import google.generativeai as genai
 # --- 1. CẤU HÌNH TRANG WEB ---
 st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
 
-# --- 2. CSS SIÊU CẤP (NỀN LIQUID + KHUNG KÍNH + VIỀN APPLE) ---
+# --- 2. CSS "LIQUID GLASS + APPLE INTELLIGENCE" ---
 st.markdown("""
 <style>
-    /* --- NỀN LIQUID DARK --- */
+    /* 1. NỀN LIQUID (Dùng đúng ảnh Sếp gửi) */
     .stApp {
-        /* Link ảnh nền chất lỏng tối */
         background-image: url("https://img.freepik.com/free-photo/abstract-black-oil-paint-texture-background_53876-102366.jpg");
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
         background-position: center;
     }
-    /* Lớp phủ tối để làm nổi bật nội dung */
+    /* Lớp phủ tối để chữ dễ đọc hơn */
     .stApp::before {
         content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0, 0, 0, 0.4); z-index: -1;
     }
 
-    /* --- ẨN CÁC THÀNH PHẦN MẶC ĐỊNH --- */
+    /* 2. ẨN GIAO DIỆN MẶC ĐỊNH */
     #MainMenu, footer, header {visibility: hidden;}
-    .stChatMessageAvatarBackground {display: none !important;} /* Ẩn avatar gốc */
+    .stChatMessageAvatarBackground {display: none !important;} /* Ẩn Avatar */
+    .stChatMessage {background: transparent !important; border: none !important;}
 
-    /* --- STYLE CHUNG CHO KHUNG KÍNH (LIQUID GLASS) --- */
-    .liquid-glass {
+    /* 3. STYLE KHUNG CHAT (GLASS + APPLE BORDER) */
+    .apple-glass {
+        position: relative;
         backdrop-filter: blur(20px); /* Kính mờ */
         -webkit-backdrop-filter: blur(20px);
-        background: rgba(255, 255, 255, 0.05); /* Trong suốt */
         border-radius: 25px;
         padding: 15px 25px;
         margin-bottom: 20px;
-        color: #ffffff;
+        color: white;
         font-weight: 500;
         display: flex;
         align-items: center;
-        box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
+        width: fit-content;
+        max-width: 85%;
         
-        /* VIỀN APPLE 7 MÀU */
-        border: 2px solid transparent; 
+        /* Kỹ thuật tạo viền cầu vồng gradient */
+        border: 2px solid transparent;
         background-clip: padding-box, border-box;
         background-origin: padding-box, border-box;
-        background-image: linear-gradient(rgba(255,255,255,0.05), rgba(255,255,255,0.05)), 
+        background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
                           linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00ff00, #0000ff, #4b0082, #9400d3);
-        position: relative;
+        
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Bóng đổ */
     }
 
-    /* Hiệu ứng Glow phát sáng xung quanh */
-    .liquid-glass::before {
+    /* Hiệu ứng Glow (Phát sáng) xung quanh */
+    .apple-glass::before {
         content: ""; position: absolute;
-        top: -3px; left: -3px; right: -3px; bottom: -3px;
-        z-index: -1; border-radius: 28px;
+        top: -2px; left: -2px; right: -2px; bottom: -2px;
         background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00ff00, #0000ff, #4b0082, #9400d3);
-        filter: blur(10px); opacity: 0.4;
+        z-index: -1;
+        border-radius: 26px;
+        filter: blur(10px); /* Làm nhòe để tạo glow */
+        opacity: 0.5;
     }
 
-    .liquid-glass .icon {
-        margin-right: 15px; font-size: 1.8rem;
-        filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+    .icon {
+        font-size: 1.8rem; margin-right: 15px;
+        filter: drop-shadow(0 0 2px rgba(255,255,255,0.8));
     }
 
-    /* --- KHUNG NHẬP LIỆU (VIỀN CẦU VỒNG) --- */
+    /* Căn chỉnh Trái - Phải */
+    .user-container { display: flex; justify-content: flex-end; }
+    .bot-container { display: flex; justify-content: flex-start; }
+
+    /* 4. KHUNG NHẬP LIỆU (VIỀN CẦU VỒNG) */
     .stChatInputContainer { padding: 30px 0; }
     .stChatInputContainer > div {
-        position: relative; border-radius: 35px; padding: 3px;
+        border-radius: 35px; padding: 3px;
         background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
         box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     }
@@ -76,11 +84,11 @@ st.markdown("""
         color: white !important; border: none !important;
     }
 
-    /* --- TIÊU ĐỀ --- */
+    /* 5. TIÊU ĐỀ */
     .title-container { text-align: center; margin-bottom: 40px; margin-top: 20px; }
     .main-title {
         font-size: 3rem; font-weight: 800; color: white;
-        text-shadow: 0 0 15px rgba(255,255,255,0.4);
+        text-shadow: 0 0 10px rgba(255,255,255,0.5);
     }
     .sub-title { font-size: 1.1rem; color: rgba(255,255,255,0.7); margin-top: 10px; }
 </style>
@@ -116,19 +124,23 @@ if "messages" not in st.session_state:
 # --- 6. HIỂN THỊ LỊCH SỬ CHAT ---
 for message in st.session_state.messages:
     if message["role"] == "user":
-        # Tin nhắn của Sếp (Icon Đỏ)
+        # Tin nhắn của Sếp (Căn phải + Viền cầu vồng)
         st.markdown(f"""
-            <div class="liquid-glass">
-                <span class="icon">🔴</span>
-                {message["content"]}
+            <div class="user-container">
+                <div class="apple-glass">
+                    <span class="icon">🔴</span>
+                    {message["content"]}
+                </div>
             </div>
         """, unsafe_allow_html=True)
     else:
-        # Tin nhắn của Bot (Icon Robot Vàng)
+        # Tin nhắn của Bot (Căn trái + Viền cầu vồng)
         st.markdown(f"""
-            <div class="liquid-glass">
-                <span class="icon">🤖</span>
-                {message["content"]}
+            <div class="bot-container">
+                <div class="apple-glass">
+                    <span class="icon">🤖</span>
+                    {message["content"]}
+                </div>
             </div>
         """, unsafe_allow_html=True)
 
@@ -138,9 +150,11 @@ user_input = st.chat_input("Nói gì với anh đi em...")
 if user_input:
     # Hiển thị User
     st.markdown(f"""
-        <div class="liquid-glass">
-            <span class="icon">🔴</span>
-            {user_input}
+        <div class="user-container">
+            <div class="apple-glass">
+                <span class="icon">🔴</span>
+                {user_input}
+            </div>
         </div>
     """, unsafe_allow_html=True)
     st.session_state.messages.append({"role": "user", "content": user_input})
@@ -152,17 +166,14 @@ if user_input:
         
         # Hiển thị Bot
         st.markdown(f"""
-            <div class="liquid-glass">
-                <span class="icon">🤖</span>
-                {bot_reply}
+            <div class="bot-container">
+                <div class="apple-glass">
+                    <span class="icon">🤖</span>
+                    {bot_reply}
+                </div>
             </div>
         """, unsafe_allow_html=True)
         st.session_state.messages.append({"role": "assistant", "content": bot_reply})
         
     except Exception as e:
-        # Bắt lỗi (ĐÂY LÀ CHỖ SẾP HAY COPY THIẾU)
-        st.markdown(f"""
-            <div class="liquid-glass" style="border-color: red;">
-                <span class="icon">⚠️</span> Lỗi kết nối: {e}
-            </div>
-        """, unsafe_allow_html=True)
+        st.error(f"Lỗi kết nối: {e}")
