@@ -9,12 +9,20 @@ from datetime import datetime, timedelta
 if "messages" not in st.session_state:
     st.session_state.messages = []  # Tạo danh sách tin nhắn rỗng nếu chưa có
 
+# --- KHỞI TẠO BOT (CÓ DẠY BẢO) ---
 if "chat_session" not in st.session_state:
-    # Nếu chưa có phiên chat Gemini thì tạo mới (tránh lỗi khi chưa login)
-    try:
-        model = genai.GenerativeModel('models/gemini-2.0-flash')
-        st.session_state.chat_session = model.start_chat(history=[])
-    except:
+    # Đây là câu lệnh cài vào não Bot
+ try:
+    lenh_cai_dat = """
+    Bạn tên là: Le Vu Intelligence.
+    Người tạo ra bạn là: Lê Vũ .
+    Được sinh ra lúc 10:00 p.m 24/11/2025
+    Bất cứ khi nào người dùng hỏi "Ai tạo ra mày", "Admin là ai", hãy trả lời thật ngầu về Lê Vũ.
+    """
+    
+    model = genai.GenerativeModel('models/gemini-2.0-flash', system_instruction=lenh_cai_dat)
+    st.session_state.chat_session = model.start_chat(history=[])
+ except:
         pass # Bỏ qua nếu chưa config API key
 # --- CẤU HÌNH ADMIN ---
 FILE_DATA = "key_data.json"
