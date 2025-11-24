@@ -5,7 +5,7 @@ import google.generativeai as genai
 st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
 
 # --- 2. CSS TÙY CHỈNH GIAO DIỆN (Bản sao y hệt ảnh) ---
-BACKGROUND_IMAGE_PATH = "/mnt/data/dfed2b2c-3820-4934-a52d-caa7a063c8d2.png"
+BACKGROUND_IMAGE_PATH = "https://sf-static.upanhlaylink.com/img/image_20251124438d8e9e8b4c9f6712b854f513430f8d.jpg"
 
 st.markdown(f"""
 <style>
