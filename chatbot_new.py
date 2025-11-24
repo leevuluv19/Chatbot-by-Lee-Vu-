@@ -40,9 +40,11 @@ st.markdown("""
 st.title("😎 LÊ VŨ DEPZAI (SYSTEM)")
 st.caption("Giao diện: 2.0 | Trạng thái:Đang Lọ :)))")
 
-# --- 3. CẤU HÌNH API ---
-MY_API_KEY = "AIzaSyCPkm6nVnyoiero1j6qqkUZ7NuMGX5gKqA"
-genai.configure(api_key=MY_API_KEY)
+try:
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=api_key)
+except Exception:
+    st.error("Chưa bỏ chìa khóa vào két sắt! Hãy vào Settings -> Secrets để điền key.")
 
 # --- 4. KHỞI TẠO BOT (CHẾ ĐỘ TÌNH YÊU) ---
 if "chat_session" not in st.session_state:
