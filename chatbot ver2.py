@@ -66,7 +66,7 @@ st.markdown("""
         inset: 0;             /* Phủ kín khung */
         border-radius: 25px;  /* Bo góc cho khớp */
         padding: 2px;         /* ĐỘ DÀY VIỀN */
-        filter: blur(5px);
+        filter: blur(10px);
         /* Dải màu hình nón: Đuôi trong suốt (transparent) -> Đầu 7 màu */
         background: conic-gradient(
             from var(--angle), 
@@ -75,7 +75,7 @@ st.markdown("""
         );
         
         /* Lệnh chạy */
-        animation: rainbow-spin 2s linear infinite;
+        animation: rainbow-spin 5s linear infinite;
         
         /* Kỹ thuật Mask: Đục thủng phần giữa để nhìn xuyên thấu */
         -webkit-mask: 
