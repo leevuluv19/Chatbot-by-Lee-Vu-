@@ -2,128 +2,103 @@ import streamlit as st
 import google.generativeai as genai
 
 # --- 1. CẤU HÌNH TRANG WEB ---
-st.set_page_config(page_title="Lê Vũ Depzai (Anh Trai)", page_icon="😎", layout="centered")
+st.set_page_config(page_title="Lê Vũ Depzai", page_icon="😎", layout="centered")
 
-# --- 2. CSS TÙY CHỈNH GIAO DIỆN (QUAN TRỌNG) ---
+# --- 2. CSS SIÊU CẤP (COMBO TẤT CẢ TÍNH NĂNG) ---
 st.markdown("""
 <style>
-    /* --- NỀN TRANG WEB --- */
+    /* 1. NỀN LIQUID (Ảnh chất lỏng) */
     .stApp {
-        background-color: #1E1E1E; /* Màu nền tối giống trong ảnh */
-        color: #FFFFFF; /* Chữ màu trắng */
-    }
-
-    /* --- TIÊU ĐỀ --- */
-    h1 {
-        text-align: center;
-        font-weight: bold;
-        padding-bottom: 20px;
+        background-image: url("https://img.freepik.com/free-photo/abstract-black-oil-paint-texture-background_53876-102366.jpg?t=st=1732523000~exp=1732526600~hmac=6c938906103908084700262070402040");
+        background-size: cover;
+        background-attachment: fixed;
     }
     
-    /* --- ẨN AVATAR MẶC ĐỊNH --- */
-    .stChatMessage .stChatMessageAvatarBackground {
-        display: none;
+    /* Lớp phủ tối để chữ dễ đọc */
+    .stApp::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: -1;
     }
 
-    /* --- TÙY CHỈNH CHAT BUBBLE CHUNG --- */
-    .stChatMessage {
-        background-color: transparent !important; /* Ẩn nền mặc định */
-        border: none !important; /* Ẩn viền mặc định */
+    /* 2. XÓA VĨNH VIỄN AVATAR */
+    div[data-testid="stChatMessageAvatarBackground"] {
+        display: none !important;
     }
-    
+    div[data-testid="stChatMessage"] {
+        background-color: transparent !important;
+        border: none !important;
+    }
+
+    /* 3. THIẾT KẾ BONG BÓNG CHAT (GLASS + APPLE GLOW) */
     .stChatMessageContent {
-        padding: 15px;
-        border-radius: 20px;
-        max-width: 80%; /* Chiều rộng tối đa của bubble */
-        color: #FFFFFF;
+        background: rgba(255, 255, 255, 0.05) !important; /* Kính mờ */
+        backdrop-filter: blur(20px);
+        border-radius: 20px !important;
+        padding: 15px !important;
+        color: #FFFFFF !important;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        width: fit-content !important; /* Chỉ rộng bằng nội dung chữ */
+        max-width: 85%;
+        display: inline-block;
     }
 
-    /* --- CHAT BUBBLE CỦA USER (Sếp) - MÀU ĐỎ, CĂN PHẢI --- */
-    /* Streamlit sắp xếp tin nhắn theo thứ tự, User thường là số chẵn (2, 4, 6...) */
+    /* --- CĂN CHỈNH TRÁI - PHẢI --- */
+    
+    /* Tin nhắn của USER (Sếp) -> Sang Phải + Viền Hồng Tím */
     div[data-testid="stChatMessage"]:nth-child(even) {
-        flex-direction: row-reverse; /* Đảo chiều để căn phải */
+        flex-direction: row-reverse;
+        text-align: right;
+    }
+    div[data-testid="stChatMessage"]:nth-child(even) .stChatMessageContent {
+        margin-left: auto;
+        border: 1px solid #FF00FF; /* Viền hồng */
+        box-shadow: 0 0 15px rgba(255, 0, 255, 0.4); /* Phát sáng hồng */
+    }
+
+    /* Tin nhắn của BOT (Anh Trai) -> Sang Trái + Viền Xanh Cyan */
+    div[data-testid="stChatMessage"]:nth-child(odd) .stChatMessageContent {
+        margin-right: auto;
+        border: 1px solid #00FFFF; /* Viền xanh */
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); /* Phát sáng xanh */
+    }
+
+    /* 4. TIÊU ĐỀ & INPUT */
+    h1 {
+        text-align: center; 
+        color: white;
+        text-shadow: 0 0 10px #00FFFF;
     }
     
-    div[data-testid="stChatMessage"]:nth-child(even) .stChatMessageContent {
-        background-color: #2C2C2E; /* Nền tối cho bubble */
-        border: 2px solid #FF3B30; /* Viền màu ĐỎ */
-        border-top-right-radius: 5px; /* Tạo góc nhọn bên phải */
-        margin-left: auto; /* Đẩy sang phải */
-    }
-
-    /* --- CHAT BUBBLE CỦA BOT (Anh Trai) - MÀU VÀNG, CĂN TRÁI --- */
-    /* Bot thường là số lẻ (1, 3, 5...) */
-    div[data-testid="stChatMessage"]:nth-child(odd) .stChatMessageContent {
-        background-color: #2C2C2E; /* Nền tối cho bubble */
-        border: 2px solid #FFCC00; /* Viền màu VÀNG/GOLD */
-        border-top-left-radius: 5px; /* Tạo góc nhọn bên trái */
-        margin-right: auto; /* Đẩy sang trái */
-    }
-
-    /* --- KHUNG NHẬP LIỆU --- */
-    .stChatInputContainer {
-        padding-bottom: 20px;
-    }
     .stChatInputContainer textarea {
-        background-color: #2C2C2E !important;
-        color: #FFFFFF !important;
-        border: 1px solid #555555 !important;
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        color: white !important;
+        border: 1px solid #555 !important;
         border-radius: 30px !important;
     }
     
+    #MainMenu, footer {visibility: hidden;}
+
 </style>
 """, unsafe_allow_html=True)
 
-# --- TIÊU ĐỀ CHÍNH ---
-st.title("Lê Vũ Depzai (Anh Trai)")
-st.caption("Trò chuyện cùng anh Lê Vũ")
+# --- GIAO DIỆN CHÍNH ---
+st.title("😎 Lê Vũ Depzai (Anh Trai)")
 
 # --- 3. CẤU HÌNH API ---
 try:
-    # Nhớ thay tên két sắt nếu Sếp đặt tên khác
     api_key = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=api_key)
 except Exception:
-    st.error("⚠️ Chưa có chìa khóa! Hãy vào Settings -> Secrets để điền API Key.")
-    st.stop()
+    st.error("⚠️ Chưa nhập chìa khóa vào két sắt (Secrets)!")
 
-# --- 4. KHỞI TẠO BOT ---
+# --- 4. LOGIC BOT ---
 if "chat_session" not in st.session_state:
     model = genai.GenerativeModel(
         'models/gemini-2.0-flash',
-        # Cài đặt tính cách: Xưng Anh - Gọi Em
-        system_instruction="Bạn tên là 'Lê Vũ depzai'. Bạn là anh trai của người dùng. Hãy xưng là 'anh' và gọi người dùng là 'em'. Phong cách nói chuyện: Ngầu, quan tâm, ngắn gọn, trưởng thành."
+        system_instruction="Bạn tên là 'Lê Vũ depzai'. Bạn là anh trai, gọi người dùng là 'em'. Phong cách: Ngầu, lạnh lùng, chiều chuộng. Trả lời ngắn gọn."
     )
-    st.session_state.chat_session = model.start_chat(history=[])
-
-# --- 5. QUẢN LÝ LỊCH SỬ CHAT ---
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Hiển thị lịch sử
-for message in st.session_state.messages:
-    # avatar=None để ẩn icon
-    with st.chat_message(message["role"], avatar=None):
-        st.markdown(message["content"])
-
-# --- 6. XỬ LÝ TIN NHẮN MỚI ---
-user_input = st.chat_input("Nói gì với anh đi em...")
-
-if user_input:
-    # 6.1. Hiển thị tin nhắn của User
-    with st.chat_message("user", avatar=None):
-        st.markdown(user_input)
-    st.session_state.messages.append({"role": "user", "content": user_input})
-
-    # 6.2. Gửi cho AI và nhận phản hồi
-    try:
-        response = st.session_state.chat_session.send_message(user_input)
-        bot_reply = response.text
-        
-        # 6.3. Hiển thị tin nhắn của Bot
-        with st.chat_message("assistant", avatar=None):
-            st.markdown(bot_reply)
-        st.session_state.messages.append({"role": "assistant", "content": bot_reply})
-        
-    except Exception as e:
-        st.error(f"Lỗi kết nối: {e}")
+    st.session_state.chat_session = model.
