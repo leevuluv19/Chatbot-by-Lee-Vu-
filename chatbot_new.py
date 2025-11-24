@@ -22,7 +22,44 @@ st.markdown("""
         background: rgba(0, 0, 0, 0.2); /* Nền tối nhẹ */
         z-index: -1; pointer-events: none;
     }
-
+/* --- VIỀN 7 MÀU CHẠY BAO QUANH MÀN HÌNH WEB --- */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 9999;
+        pointer-events: none; /* Để chuột bấm xuyên qua được */
+        padding: 5px; /* Độ dày viền màn hình */
+        
+        background: conic-gradient(
+            from var(--angle), 
+            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
+        );
+        
+        animation: spin 4s linear infinite; /* Dùng lại animation spin có sẵn ở dưới */
+        
+        -webkit-mask: 
+           linear-gradient(#fff 0 0) content-box, 
+           linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+    }
+    
+    /* Hiệu ứng Loe sáng (Glow) cho viền màn hình */
+    body::after {
+        content: "";
+        position: fixed;
+        top: -5px; left: -5px; right: -5px; bottom: -5px;
+        z-index: 9998;
+        pointer-events: none;
+        background: conic-gradient(
+            from var(--angle), 
+            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
+        );
+        animation: spin 4s linear infinite;
+        filter: blur(20px); /* Độ loe sáng */
+        opacity: 0.5;
+    }
     /* ẨN GIAO DIỆN CŨ */
     #MainMenu, footer, header {visibility: hidden;}
     .stChatMessageAvatarBackground {display: none !important;}
