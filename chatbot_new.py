@@ -22,9 +22,9 @@ st.markdown("""
         background: rgba(0, 0, 0, 0.2); /* Nền tối nhẹ */
         z-index: -1; pointer-events: none;
     }
-/* --- VIỀN SƯƠNG MÙ 7 MÀU (FOGGY RAINBOW) --- */
+/* --- VIỀN SƯƠNG MÙ 7 MÀU (SUPER FOGGY GLOW) --- */
     
-    /* LỚP 1: LÕI SƯƠNG (Đậm hơn, sát mép) */
+    /* LỚP 1: SƯƠNG DÀY (Thay vì đường line mỏng) */
     body::before {
         content: "";
         position: fixed;
@@ -32,8 +32,8 @@ st.markdown("""
         z-index: 9999;
         pointer-events: none;
         
-        /* Tăng độ dày lên để sương có độ "đầm" */
-        padding: 10px; 
+        /* QUAN TRỌNG: Phải dày 40px thì mới ra đám sương được */
+        padding: 40px; 
         
         background: conic-gradient(
             from var(--angle), 
@@ -42,25 +42,29 @@ st.markdown("""
         
         animation: spin 4s linear infinite;
         
+        /* Đục lỗ giữa */
         -webkit-mask: 
            linear-gradient(#fff 0 0) content-box, 
            linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
         
-        /* ĐÂY LÀ CHÌA KHÓA: Làm nhòe mạnh ngay từ lớp chính */
-        filter: blur(15px); 
+        /* Làm nhòe mạnh để xóa tan nét cứng */
+        filter: blur(30px); 
         opacity: 0.8;
     }
     
-    /* LỚP 2: HƠI SƯƠNG LAN TỎA (Nhạt hơn, loe rộng) */
+    /* LỚP 2: ÁNH SÁNG LAN TỎA RA XUNG QUANH */
     body::after {
         content: "";
         position: fixed;
-        /* Loe rộng ra ngoài màn hình rất nhiều */
-        top: -30px; left: -30px; right: -30px; bottom: -30px;
+        /* Loe rộng ra ngoài màn hình */
+        top: 0; left: 0; right: 0; bottom: 0;
         z-index: 9998;
         pointer-events: none;
+        
+        /* Dày hơn nữa để tạo nền sương */
+        padding: 60px; 
         
         background: conic-gradient(
             from var(--angle), 
@@ -75,9 +79,9 @@ st.markdown("""
         -webkit-mask-composite: xor;
         mask-composite: exclude;
 
-        /* Blur cực mạnh để tạo cảm giác như khói/sương */
-        filter: blur(50px); 
-        opacity: 0.5;
+        /* Blur khổng lồ */
+        filter: blur(60px); 
+        opacity: 0.6;
     }
     /* ẨN GIAO DIỆN CŨ */
     #MainMenu, footer, header {visibility: hidden;}
