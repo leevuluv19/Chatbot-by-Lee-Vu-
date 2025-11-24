@@ -49,7 +49,7 @@ st.markdown("""
         mask-composite: exclude;
         
         /* ĐÂY LÀ CHÌA KHÓA: Làm nhòe mạnh ngay từ lớp chính */
-        filter: blur(20px); 
+        filter: blur(15px); 
         opacity: 0.8;
     }
     
@@ -77,7 +77,7 @@ st.markdown("""
 
         /* Blur cực mạnh để tạo cảm giác như khói/sương */
         filter: blur(50px); 
-        opacity: 0.7;
+        opacity: 0.5;
     }
     /* ẨN GIAO DIỆN CŨ */
     #MainMenu, footer, header {visibility: hidden;}
