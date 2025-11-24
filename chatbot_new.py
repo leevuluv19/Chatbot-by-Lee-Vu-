@@ -22,9 +22,9 @@ st.markdown("""
         background: rgba(0, 0, 0, 0.2); /* Nền tối nhẹ */
         z-index: -1; pointer-events: none;
     }
-/* --- VIỀN SƯƠNG MÙ 7 MÀU (SUPER FOGGY GLOW) --- */
+/* --- VIỀN NEON 7 MÀU CHẠY (MỎNG NHƯNG TỎA SÁNG MẠNH) --- */
     
-    /* LỚP 1: SƯƠNG DÀY (Thay vì đường line mỏng) */
+    /* LỚP 1: SỢI DÂY NGUỒN (Nét căng, chạy màu) */
     body::before {
         content: "";
         position: fixed;
@@ -32,8 +32,7 @@ st.markdown("""
         z-index: 9999;
         pointer-events: none;
         
-        /* QUAN TRỌNG: Phải dày 40px thì mới ra đám sương được */
-        padding: 40px; 
+        padding: 4px; /* ĐỘ DÀY VIỀN CHỈ 4PX THÔI */
         
         background: conic-gradient(
             from var(--angle), 
@@ -42,29 +41,24 @@ st.markdown("""
         
         animation: spin 4s linear infinite;
         
-        /* Đục lỗ giữa */
+        /* Mask để đục thủng giữa */
         -webkit-mask: 
            linear-gradient(#fff 0 0) content-box, 
            linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
-        
-        /* Làm nhòe mạnh để xóa tan nét cứng */
-        filter: blur(30px); 
-        opacity: 0.8;
     }
     
-    /* LỚP 2: ÁNH SÁNG LAN TỎA RA XUNG QUANH */
+    /* LỚP 2: ÁNH SÁNG TỎA RA (GLOW) */
     body::after {
         content: "";
         position: fixed;
-        /* Loe rộng ra ngoài màn hình */
+        /* Phủ trùm lên viền chính */
         top: 0; left: 0; right: 0; bottom: 0;
         z-index: 9998;
         pointer-events: none;
         
-        /* Dày hơn nữa để tạo nền sương */
-        padding: 60px; 
+        padding: 4px; /* Dày bằng viền chính */
         
         background: conic-gradient(
             from var(--angle), 
@@ -79,9 +73,9 @@ st.markdown("""
         -webkit-mask-composite: xor;
         mask-composite: exclude;
 
-        /* Blur khổng lồ */
-        filter: blur(60px); 
-        opacity: 0.6;
+        /* ĐÂY LÀ PHÉP THUẬT: Làm nhòe cực mạnh để tạo sương */
+        filter: blur(20px); 
+        opacity: 1; /* Tăng độ sáng lên tối đa */
     }
     /* ẨN GIAO DIỆN CŨ */
     #MainMenu, footer, header {visibility: hidden;}
