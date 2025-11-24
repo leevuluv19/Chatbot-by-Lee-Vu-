@@ -63,7 +63,7 @@ st.markdown(f"""
         margin-right: 15px;
         font-size: 1.8rem; /* to hơn chút để giống ảnh */
         filter: drop-shadow(0 0 8px rgba(255,255,255,0.6));
-    }}
+    }
     .liquid-glass .icon {{
         margin-right: 15px;
         font-size: 1.8rem; /* to hơn chút để giống ảnh */
