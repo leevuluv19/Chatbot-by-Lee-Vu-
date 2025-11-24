@@ -26,18 +26,11 @@ st.markdown("""
     .stChatMessageAvatarBackground {display: none !important;}
     .stChatMessage {background: transparent !important; border: none !important;}
 
-    /* --- 3. ANIMATION 7 MÀU CHẠY --- */
-    @keyframes rainbow-run {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-
     /* --- 4. STYLE KHUNG CHAT (ÁP DỤNG CHO CẢ 2) --- */
     .liquid-glass {
         position: relative;
         
-        /* Nền kính trong suốt (Đen mờ 10%) */
+        /* Nền kính trong suốt (Đen mờ 5%) */
         background: rgba(0, 0, 0, 0.3); 
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
@@ -54,26 +47,37 @@ st.markdown("""
         box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
 
-    /* --- KỸ THUẬT TẠO VIỀN 7 MÀU CHẠY (MASK COMPOSITE) --- */
+    /* 1. Khai báo biến góc quay (Để màu chạy mượt) */
+    @property --angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+
+    /* 2. Định nghĩa xoay vòng 360 độ */
+    @keyframes rainbow-spin {
+        to { --angle: 360deg; }
+    }
+
+    /* 3. TẠO VIỀN CHẠY NỐI ĐUÔI (Quan trọng nhất) */
     .liquid-glass::before {
         content: "";
         position: absolute;
-        inset: 0; /* Phủ kín khung */
-        border-radius: 25px; 
-        padding: 2px; /* ĐỘ DÀY VIỀN */
+        inset: 0;             /* Phủ kín khung */
+        border-radius: 25px;  /* Bo góc cho khớp */
+        padding: 2px;         /* ĐỘ DÀY VIỀN */
         
-        /* Dải màu cầu vồng */
-        background: linear-gradient(
-            90deg, 
-            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
+        /* Dải màu hình nón: Đuôi trong suốt (transparent) -> Đầu 7 màu */
+        background: conic-gradient(
+            from var(--angle), 
+            transparent 40%, 
+            #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000
         );
-        background-size: 400%; /* Kéo dài dải màu */
         
-        /* Animation chạy liên tục */
-        animation: rainbow-run 10s linear infinite;
+        /* Lệnh chạy */
+        animation: rainbow-spin 3s linear infinite;
         
-        /* --- PHÉP THUẬT ĐỤC LỖ --- */
-        /* Dùng mask để đục thủng phần giữa, chỉ giữ lại viền */
+        /* Kỹ thuật Mask: Đục thủng phần giữa để nhìn xuyên thấu */
         -webkit-mask: 
            linear-gradient(#fff 0 0) content-box, 
            linear-gradient(#fff 0 0);
@@ -81,11 +85,7 @@ st.markdown("""
         mask-composite: exclude;
         
         pointer-events: none;
-    }
-
-    .icon {
-        font-size: 1.8rem;
-        filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+        z-index: -1;
     }
 
     /* CĂN CHỈNH VỊ TRÍ */
