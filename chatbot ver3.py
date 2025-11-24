@@ -70,30 +70,18 @@ st.markdown("""
         color: white !important; border: none !important;
     }
 
-[data-testid="stFileUploader"] {
-        position: fixed !important;
-        bottom: 28px !important;
-        left: 20px !important;
+    /* --- [FIX QUAN TRỌNG] ĐƯA NÚT ẢNH NỔI LÊN TRÊN --- */
+    [data-testid="stFileUploader"] {
+        position: fixed !important; /* Cố định vị trí */
+        bottom: 30px !important;    /* Cách đáy 28px */
+        left: 60px !important;      /* Cách trái 20px */
         width: 45px !important;
         height: 45px !important;
-        z-index: 999999 !important;
+        z-index: 999999 !important; /* Lớp cao nhất, đè lên tất cả */
         background-color: transparent !important;
-        color: transparent !important; /* Tàng hình mọi chữ "Drag and drop" */
-    }
-    
-    /* 2. Ẩn sạch các thành phần thừa bên trong */
-    [data-testid="stFileUploader"] section { padding: 0 !important; min-height: 0 !important; }
-    [data-testid="stFileUploader"] div[data-testid="stUploadDropzone"] { display: none !important; }
-    [data-testid="stFileUploader"] small { display: none !important; }
-    [data-testid="stFileUploader"] label { display: none !important; }
-    [data-testid="stFileUploader"] span { display: none !important; } 
-    
-    /* Ẩn luôn cái dòng text hướng dẫn cứng đầu nhất */
-    [data-testid="stFileUploader"] section > div:first-child { 
-        display: none !important; 
     }
 
-    /* 3. Biến hình nút bấm thành hình tròn Icon */
+    /* Tạo hình cái nút tròn */
     [data-testid="stFileUploader"] button {
         border-radius: 50% !important;
         width: 45px !important; 
@@ -107,19 +95,15 @@ st.markdown("""
         padding: 0 !important;
         margin: 0 !important;
         backdrop-filter: blur(10px);
-        position: relative; /* Để icon neo vào */
-        visibility: visible !important; /* Bắt buộc hiện nút này */
     }
     
-    /* 4. Thêm icon Máy ảnh vào giữa */
+    /* Thêm icon Máy ảnh vào giữa */
     [data-testid="stFileUploader"] button::after {
         content: "📸"; 
         color: white; 
         font-size: 22px;
+        visibility: visible !important;
         position: absolute;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        cursor: pointer;
     }
     
     /* Hiệu ứng hover */
