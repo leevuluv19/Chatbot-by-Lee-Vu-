@@ -9,6 +9,16 @@ from datetime import datetime, timedelta
 # --- KHỞI TẠO CÁC BIẾN QUAN TRỌNG (Dán ngay đầu file, sau Import) ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "extra_knowledge" not in st.session_state:
+    # Biến này lưu trữ các bài học được dạy bằng lệnh /day và kiến thức cố định
+    st.session_state.extra_knowledge = [
+        # --- DANH TÍNH CỦA BOT & ADMIN ---
+        "Tôi là trí tuệ nhân tạo được phát triển bởi Admin Lê Vũ.",
+        "Phong cách giao tiếp của tôi là ngầu, súc tích và đôi khi hơi tinh nghịch.",
+        "Tên đầy đủ của người tạo ra tôi là Lê Văn Vũ, và anh ấy là Admin đẹp trai nhất Thanh Hóa.",
+        "Khi khách hàng muốn mua Key hoặc gia hạn, họ cần liên hệ trực tiếp với Admin Lê Vũ qua Zalo.",
+        "SDT của ADMIN depzai : 0376274345 "
+    ]   
 if "chat_session" not in st.session_state:
     try: 
         # 1. TÍNH TOÁN VÀ LƯU NGÀY CHÍNH XÁC (Ví dụ: Thứ Ba, ngày 25/11/2025)
