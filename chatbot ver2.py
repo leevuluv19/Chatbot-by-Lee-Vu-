@@ -363,7 +363,7 @@ st.markdown("""
     /* Royal Blue Shadow (Xanh Hoàng Gia: RGB 65, 105, 225) */
     text-shadow: 0 0 12px rgba(65, 105, 225, 1), /* Sáng mạnh */
                  0 0 20px rgba(65, 105, 225, 1); /* Tỏa sáng rộng */
-    margin-top: 15px; 
+    margin-top: 10px; 
     margin-bottom: 30px;
 }
 /* --- OVERRIDE STYLE CHO HỘP THÔNG BÁO (st.info, st.error, etc.) --- */
