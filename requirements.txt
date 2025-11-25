@@ -1,3 +1,4 @@
 streamlit
 streamlit-paste-button
 google-genai
+google-generativeai
