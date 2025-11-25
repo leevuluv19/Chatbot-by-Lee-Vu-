@@ -394,20 +394,51 @@ with chat_container:
 # Tạo container cố định ở đáy để chứa công cụ và thanh chat
 with st.container():
     # 7.1. Thanh công cụ upload (Dạng Expander nằm trên)
-    with st.expander("📸 Tải ảnh lên (Nếu cần)", expanded=False):
-        uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
-        image_to_send = None
-        if uploaded_file:
-            image_to_send = Image.open(uploaded_file)
-            st.image(image_to_send, width=50, caption="Ảnh đã chọn")
-            st.caption("✅ Ảnh đã sẵn sàng. Nhấn Enter để gửi.")
+    # --- 7.1. Thanh công cụ upload (Đã sửa để lưu vào session state) ---
+ with st.expander("📸 Tải ảnh lên (Nếu cần)", expanded=False):
+    uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
+    
+    # Khởi tạo biến lưu ảnh nếu chưa có
+    if "current_image" not in st.session_state:
+        st.session_state.current_image = None
+        st.session_state.current_image_display = None # Dùng để hiện ảnh preview
 
+    if uploaded_file:
+        try:
+            image_to_send = Image.open(uploaded_file)
+            st.session_state.current_image = image_to_send
+            st.session_state.current_image_display = uploaded_file.name
+            st.image(image_to_send, width=50, caption=f"Đã chọn: {uploaded_file.name}")
+            st.caption("✅ Ảnh đã sẵn sàng. Nhấn Enter để gửi.")
+        except Exception as e:
+            st.error(f"Lỗi tải ảnh: {e}")
+    
+    # Thêm nút Clear (giúp xoá ảnh khỏi bộ nhớ)
+    if st.session_state.current_image is not None:
+        if st.button("❌ Xóa ảnh đã chọn"):
+            st.session_state.current_image = None
+            st.session_state.current_image_display = None
+            st.rerun()
     # 7.2. Thanh Chat Input (Nằm ngay dưới)
     user_input = st.chat_input("Nhập tin nhắn của bạn...")
 
 # --- 8. XỬ LÝ LOGIC GỬI TIN ---
 if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
+# --- 8. XỬ LÝ LOGIC GỬI TIN (Đã sửa để lấy ảnh từ session state) ---
+ if user_input:
     
+    # Lấy ảnh ra từ session state (nó sẽ là None nếu không có ảnh)
+    image_to_send = st.session_state.current_image
+    
+    display_text = user_input
+    
+    # Kiểm tra an toàn trước khi thêm vào inputs
+    inputs = [user_input]
+    if image_to_send is not None: 
+        display_text = f"[Đã gửi kèm ảnh ({st.session_state.current_image_display})] <br> {user_input}"
+        inputs.append(image_to_send) # CHỈ ADD KHI CHẮC CHẮN LÀ ẢNH
+
+    # ... (Phần còn lại của code, không thay đổi)    
     display_text = user_input
     if image_to_send:
         display_text = f"[Đã gửi kèm ảnh] <br> {user_input}"
