@@ -10,30 +10,21 @@ if "messages" not in st.session_state:
     st.session_state.messages = []  # Tạo danh sách tin nhắn rỗng nếu chưa có
 if "chat_session" not in st.session_state:
     try: 
-        # BƯỚC 1: Lấy ngày hiện tại chính xác từ hệ thống Python
-        # datetime.now() đảm bảo luôn lấy ngày mới nhất (Ví dụ: 25/11/2025)
-        current_date = datetime.now().strftime("%A, ngày %d/%m/%Y") 
-        
-        # BƯỚC 2: Tiêm (Inject) dữ liệu thời gian vào bộ não Bot (system_instruction)
+        current_date = datetime.now().strftime("%A, ngày 25/11/2025") 
         lenh_cai_dat = f"""
-        ... (giữ nguyên các quy tắc cũ) ...
-        
-        --- DỮ LIỆU THỜI GIAN HIỆN TẠI ---
-        NGÀY VÀ GIỜ HỢP LỆ HIỆN TẠI LÀ: {current_date}. 
-        Bất cứ khi nào người dùng hỏi về ngày, BẠN PHẢI DÙNG CHÍNH XÁC thông tin này.
-        --- KẾT THÚC DỮ LIỆU THỜI GIAN ---
-        
-        QUY TẮC BẮT BUỘC:
-        1. Nếu người dùng hỏi NGÀY/GIỜ hiện tại, BẠN PHẢI DÙNG CHÍNH XÁC thông tin đã được tiêm vào ở trên.
-        ... (các quy tắc khác) ...
+        ... (giữ nguyên toàn bộ nội dung lệnh cài đặt) ...
         """
         
-        # Khởi tạo Model (không còn lỗi do config=)
+        # Sửa lại: Định nghĩa cấu hình bằng Dictionary (Plain Dict)
+        config_search = {
+            "tools": [{'googleSearch': {}}]
+        }
+
+        # Sửa lại dòng này
         model = genai.GenerativeModel(
-            'models/gemini-2.5-pro',
-            system_instruction=lenh_cai_dat,
-            # KHÔNG CÓ tham số config= ở đây
-        )
+    'models/gemini-2.5-pro', # <--- Tên model mới
+    system_instruction=lenh_cai_dat,
+    )
         
         st.session_state.chat_session = model.start_chat(history=[]) 
         st.session_state.config_search = config_search 
@@ -394,51 +385,20 @@ with chat_container:
 # Tạo container cố định ở đáy để chứa công cụ và thanh chat
 with st.container():
     # 7.1. Thanh công cụ upload (Dạng Expander nằm trên)
-    # --- 7.1. Thanh công cụ upload (Đã sửa để lưu vào session state) ---
- with st.expander("📸 Tải ảnh lên (Nếu cần)", expanded=False):
-    uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
-    
-    # Khởi tạo biến lưu ảnh nếu chưa có
-    if "current_image" not in st.session_state:
-        st.session_state.current_image = None
-        st.session_state.current_image_display = None # Dùng để hiện ảnh preview
-
-    if uploaded_file:
-        try:
+    with st.expander("📸 Tải ảnh lên (Nếu cần)", expanded=False):
+        uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
+        image_to_send = None
+        if uploaded_file:
             image_to_send = Image.open(uploaded_file)
-            st.session_state.current_image = image_to_send
-            st.session_state.current_image_display = uploaded_file.name
-            st.image(image_to_send, width=50, caption=f"Đã chọn: {uploaded_file.name}")
+            st.image(image_to_send, width=50, caption="Ảnh đã chọn")
             st.caption("✅ Ảnh đã sẵn sàng. Nhấn Enter để gửi.")
-        except Exception as e:
-            st.error(f"Lỗi tải ảnh: {e}")
-    
-    # Thêm nút Clear (giúp xoá ảnh khỏi bộ nhớ)
-    if st.session_state.current_image is not None:
-        if st.button("❌ Xóa ảnh đã chọn"):
-            st.session_state.current_image = None
-            st.session_state.current_image_display = None
-            st.rerun()
+
     # 7.2. Thanh Chat Input (Nằm ngay dưới)
     user_input = st.chat_input("Nhập tin nhắn của bạn...")
 
 # --- 8. XỬ LÝ LOGIC GỬI TIN ---
 if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
-# --- 8. XỬ LÝ LOGIC GỬI TIN (Đã sửa để lấy ảnh từ session state) ---
- if user_input:
     
-    # Lấy ảnh ra từ session state (nó sẽ là None nếu không có ảnh)
-    image_to_send = st.session_state.current_image
-    
-    display_text = user_input
-    
-    # Kiểm tra an toàn trước khi thêm vào inputs
-    inputs = [user_input]
-    if image_to_send is not None: 
-        display_text = f"[Đã gửi kèm ảnh ({st.session_state.current_image_display})] <br> {user_input}"
-        inputs.append(image_to_send) # CHỈ ADD KHI CHẮC CHẮN LÀ ẢNH
-
-    # ... (Phần còn lại của code, không thay đổi)    
     display_text = user_input
     if image_to_send:
         display_text = f"[Đã gửi kèm ảnh] <br> {user_input}"
@@ -452,33 +412,31 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
     
     # Lưu vào session state
     st.session_state.messages.append({"role": "user", "content": display_text})
-try:
-    inputs = [user_input]
-    if image_to_send:
-        inputs.append(image_to_send)
 
-    with chat_container:
-        with st.spinner("Le Vu Intelligence đang suy nghĩ...."):
-            
-            # BƯỚC 1: LẤY CẤU HÌNH RA KHỎI SESSION STATE VÀ GỌI NÓ LÀ search_config
-            config_search = {
-    "tools": [{'googleSearch': {}}]
-} 
+  # --- PHẦN GỬI TIN & XỬ LÝ STREAMING (Đã sửa lỗi config=) ---
+    try:
+        inputs = [user_input]
+        if image_to_send:
+            inputs.append(image_to_send)
 
-            # BƯỚC 2: GỬI TIN NHẮN (Dùng tên biến đã được định nghĩa là search_config)
-            response_stream = st.session_state.chat_session.send_message(
-    content=inputs,
-    # DÒNG LỖI ĐÃ BỊ XÓA HẾT: config=search_config
-    stream=True 
-)
-        bot_message_placeholder = st.empty()
-        full_bot_reply = ""
+        with chat_container:
+            with st.spinner("Le Vu Intelligence đang suy nghĩ...."):
+                search_config = st.session_state.get("config_search", {}) 
+
+                # XÓA HOÀN TOÀN tham số config=search_config
+                response_stream = st.session_state.chat_session.send_message(
+                    content=inputs,
+                    stream=True 
+                )
+                
+                bot_message_placeholder = st.empty()
+                full_bot_reply = ""
                 
                 # Hiện khung chat rỗng để bắt đầu in chữ
-        st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div id="bot-response"></div></div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div id="bot-response"></div></div></div>""", unsafe_allow_html=True)
                 
                 # Duyệt stream và in chữ
-        for chunk in response_stream:
+                for chunk in response_stream:
                     if chunk.text:
                         full_bot_reply += chunk.text
                         st.markdown(f"""
@@ -490,11 +448,11 @@ try:
                         </div>
                         """, unsafe_allow_html=True)
                         
-        bot_reply = full_bot_reply
+                bot_reply = full_bot_reply
 
         # Lưu vào session state sau khi stream xong
-    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
-    
-except Exception as e:
+        st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+        
+    except Exception as e:
         with chat_container:
             st.error(f"Lỗi: {e}")
