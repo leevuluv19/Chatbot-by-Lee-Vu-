@@ -163,7 +163,7 @@ st.markdown("""
         z-index: 9999;
         pointer-events: none;
         
-        padding: 4px; /* ĐỘ DÀY VIỀN CHỈ 4PX THÔI */
+        padding: 2px; /* ĐỘ DÀY VIỀN CHỈ 4PX THÔI */
         
         background: conic-gradient(
             from var(--angle), 
@@ -189,7 +189,7 @@ st.markdown("""
         z-index: 9998;
         pointer-events: none;
         
-        padding: 4px; /* Dày bằng viền chính */
+        padding: 2px; /* Dày bằng viền chính */
         
         background: conic-gradient(
             from var(--angle), 
@@ -224,7 +224,7 @@ st.markdown("""
     }
     .liquid-glass {
         position: relative;
-        background: rgba(255, 255, 255, 0.001); 
+        background: rgba(255, 255, 255, 0.0001); 
         
         backdrop-filter: blur(2px); 
         -webkit-backdrop-filter: blur(2px);
@@ -255,7 +255,7 @@ st.markdown("""
             #00C6FF, #0072FF, #8E2DE2, #F80759, #FF8C00, #E0C3FC, #00C6FF
         );
         
-        animation: spin 6s linear infinite;
+        animation: spin 8s linear infinite;
         
         -webkit-mask: 
            linear-gradient(#fff 0 0) content-box, 
@@ -291,7 +291,7 @@ st.markdown("""
     /* ================= GIAO DIỆN NHƯ ẢNH 2 ================= */
     /* --- Style cho Thanh công cụ Upload (Expander) --- */
     .streamlit-expanderHeader {
-        background-color: rgba(255, 255, 255, 0.1) !important; /* Nền trong suốt nhẹ */
+        background-color: rgba(255, 255, 255, 0.01) !important; /* Nền trong suốt nhẹ */
         border-radius: 15px !important;
         border: 1px solid rgba(255,255,255,0.2) !important;
         color: white !important;
@@ -306,7 +306,7 @@ st.markdown("""
     [data-testid="stExpander"] .streamlit-expanderContent {
         background-color: rgba(0,0,0,0.3) !important;
         border-radius: 0 0 15px 15px !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
+        border: 1px solid rgba(255,255,255,0.01) !important;
         border-top: none !important;
     }
     
