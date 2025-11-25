@@ -363,19 +363,21 @@ if "user_role" not in st.session_state:
 
 # --- LOGIC NÚT ĐĂNG NHẬP (Thay thế khối col1, col2, col3 cũ) ---
 # --- LOGIC NÚT ĐĂNG NHẬP & DÙNG THỬ (Thay thế khối col1, col2, col3 cũ) ---
+# --- LOGIC NÚT ĐĂNG NHẬP & MUA KEY (Xóa tính năng Trial) ---
 if not st.session_state.logged_in:
-    # ... (Giữ nguyên phần st.markdown cho Title và Contact Info) ...
+    # ... (Giữ nguyên các khối st.markdown Title và Contact Info) ...
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         input_sdt = st.text_input("Số điện thoại:", placeholder="Nhập SĐT của bạn...")
         input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key kích hoạt...", label_visibility="visible")
         
-        col_login, col_trial = st.columns(2)
+        # TẠO HAI CỘT CHO 2 NÚT
+        col_login, col_buy = st.columns(2)
         
         with col_login:
             if st.button("ĐĂNG NHẬP 🚀", use_container_width=True):
-                # ... (Giữ nguyên logic đăng nhập Key cũ) ...
+                # Logic đăng nhập Key (Vẫn giữ nguyên)
                 success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
                 if success:
                     st.session_state.logged_in = True
@@ -385,32 +387,12 @@ if not st.session_state.logged_in:
                 else:
                     st.error(msg)
         
-        with col_trial:
-            if st.button(f"DÙNG THỬ ({TRIAL_LIMIT} câu)", use_container_width=True):
-                
-                # 1. Bắt buộc nhập SDT
-                if not input_sdt:
-                    st.error("⚠️ Vui lòng nhập SĐT để đăng ký dùng thử lần đầu.")
-                    st.stop()
-                    
-                # 2. KIỂM TRA ĐỊNH DẠNG HỢP LỆ
-                if not kiem_tra_sdt_vietnam(input_sdt):
-                    st.error("⚠️ SĐT không hợp lệ. Vui lòng nhập SĐT Việt Nam 10 số, bắt đầu bằng 0.")
-                    st.stop()
-                    
-                # 3. KIỂM TRA KHÓA (TRIAL LOCK)
-                is_locked, lock_msg = khoa_sdt_trial(input_sdt)
-                
-                if is_locked:
-                    st.error(lock_msg) 
-                    st.stop()
-                
-                # 4. Cho phép dùng thử (Lần đầu của SDT này)
-                st.session_state.logged_in = True
-                st.session_state.user_role = 'trial'
-                st.session_state.trial_count = 0 
-                st.success(f"Chào mừng! Bạn có {TRIAL_LIMIT} câu hỏi để dùng thử.")
-                st.rerun() 
+        with col_buy:
+            # Nút MUA KEY / LIÊN HỆ (Thay thế nút Dùng thử)
+            if st.button(f"MUA KEY / LH ZALO", use_container_width=True):
+                st.info("Vui lòng liên hệ Admin qua Zalo để mua Key chính thức!")
+                # Thêm code chuyển hướng nếu bạn có link Zalo
+                # Ví dụ: st.markdown(f'<a href="https://zalo.me/0376274345" target="_blank">Click vào đây để chat Zalo</a>', unsafe_allow_html=True)
 
     st.stop()
 # --- PANEL QUẢN LÝ (ADMIN MỚI) ---
