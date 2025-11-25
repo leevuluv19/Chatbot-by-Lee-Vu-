@@ -109,6 +109,7 @@ def save_data(data):
         json.dump(data, f, indent=4)
 
 # [CẬP NHẬT] Hàm tạo key nhận thêm số ngày sử dụng
+# --- HÀM TẠO KEY (Tao_key_moi) ---
 def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
     data = load_data()
     phan_duoi = secrets.token_hex(4).upper() 
@@ -126,33 +127,29 @@ def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
         "note": ghi_chu
     }
     save_data(data)
-    return new_key, ngay_het_han.strftime("%d/%m/%Y")
+    return new_key, ngay_het_han.strftime("%d/%m/%Y") # <--- KẾT THÚC HÀM NÀY
 
-# [CẬP NHẬT] Hàm check đăng nhập kiểm tra hạn sử dụng
+# --- HÀM KHÓA TRIAL (Khoa_sdt_trial) ---
 def khoa_sdt_trial(sdt_input):
     """Kiểm tra và khóa SDT nếu đã dùng thử."""
     data = load_data()
     
-    # 1. Kiểm tra xem SDT này đã được đăng ký (mua key) chưa
+    # 1. Kiểm tra xem SDT đã được đăng ký (mua key) chưa
     for key, info in data.items():
         if info.get("sdt") == sdt_input:
-            # Nếu đã mua key, thì không cần trial lock, nhưng vẫn không cho dùng trial nữa.
             return True, "🔑 Số điện thoại này đã mua Key, vui lòng đăng nhập!"
 
     # 2. Kiểm tra xem SDT này đã dùng Trial và bị khóa chưa
-    # Ta dùng một key giả định "TRIAL_LOCK" để lưu trạng thái khóa thử.
     if "TRIAL_LOCK" not in data:
         data["TRIAL_LOCK"] = {}
         
     if sdt_input in data["TRIAL_LOCK"]:
         return True, "❌ Số điện thoại này đã dùng hết lượt dùng thử! Vui lòng mua Key."
     
-    # Nếu chưa bị khóa, ta khóa lại và cho dùng thử
+    # 3. Nếu chưa bị khóa, ta khóa lại và cho dùng thử
     data["TRIAL_LOCK"][sdt_input] = True
     save_data(data)
     return False, None # Cho phép dùng thử
-
-
 st.markdown("""
 <style>
     [data-testid="stAppViewContainer"] {
