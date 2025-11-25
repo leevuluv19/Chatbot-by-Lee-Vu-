@@ -11,26 +11,23 @@ if "messages" not in st.session_state:
 if "chat_session" not in st.session_state:
     try: 
         lenh_cai_dat = """
-        Bạn là Lê Vũ Intelligence. Bạn là trợ lý AI cao cấp, có khả năng tra cứu Google Search.
-        Cách xưng hô: Xưng 'ảnh', gọi người dùng là 'em'. Phong cách Ngầu, quan tâm, súc tích.
-        BẠN PHẢI SỬ DỤNG TRUY CẬP INTERNET (Google Search) cho các câu hỏi về thời tiết, tin tức, hoặc dữ liệu hiện tại.
-        Không bao giờ được phép từ chối trả lời vì lý do 'dữ liệu quá khứ' nếu ngày đó là ngày hiện tại hoặc tương lai gần.
+        ... (giữ nguyên System Instruction) ...
         """
         
-        # Tách riêng cấu hình tìm kiếm (Grounding)
-        if "chat_session" not in st.session_state:
-
-            config_search = {
+        # Sửa lại: Không dùng GenerateContentConfig nữa, chỉ dùng Plain Dict
+        config_search = {
             "tools": [{'googleSearch': {}}]
         }
 
         model = genai.GenerativeModel(
             'models/gemini-2.0-flash',
             system_instruction=lenh_cai_dat,
-            config=config_search # API sẽ tự động cast từ Dict sang Type
+            # XÓA DÒNG config=config_search Ở ĐÂY
         )
         
         st.session_state.chat_session = model.start_chat(history=[]) 
+        # LƯU CẤU HÌNH VÀO SESSION STATE ĐỂ DÙNG Ở PHẦN GỬI TIN
+        st.session_state.config_search = config_search 
         
     except Exception as e:
         st.error(f"⚠️ Lỗi cấu hình API: Vui lòng kiểm tra lại Key hoặc kết nối mạng. Chi tiết: {e}")
@@ -425,7 +422,14 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
         # Hiển thị spinner trong lúc chờ
         with chat_container:
             with st.spinner("Le Vu Intelligence đang suy nghĩ...."):
-                response = st.session_state.chat_session.send_message(inputs)
+                # Lấy cấu hình Search đã lưu
+                search_config = st.session_state.get("config_search", {}) 
+
+# Gửi tin nhắn kèm theo Cấu hình Search
+                response = st.session_state.chat_session.send_message(
+    contents=inputs, 
+    config=search_config # <--- TRUYỀN CẤU HÌNH VÀO LỆNH GỬI TIN
+)
                 bot_reply = response.text
         
         # Hiện tin nhắn Bot
