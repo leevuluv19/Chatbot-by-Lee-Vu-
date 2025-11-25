@@ -19,23 +19,37 @@ if "extra_knowledge" not in st.session_state:
         "Tên đầy đủ của người tạo ra tôi là Lê Văn Vũ, và anh ấy là Admin đẹp trai nhất Thanh Hóa.", ]
      
     st.session_state.extra_knowledge = []    
+i# Đảm bảo dòng 'from datetime import datetime, timedelta' đã có ở đầu file
+
 if "chat_session" not in st.session_state:
     try: 
-        current_date = datetime.now().strftime("%A, ngày 25/11/2025") 
+        # 1. TÍNH TOÁN VÀ LƯU NGÀY CHÍNH XÁC (Ví dụ: Thứ Ba, ngày 25/11/2025)
+        current_date = datetime.now().strftime("Thứ ba, ngày 25/11/2025") 
+    
         lenh_cai_dat = f"""
-        ... (giữ nguyên toàn bộ nội dung lệnh cài đặt) ...
+        Bạn là Lê Vũ Intelligence. Bạn là trợ lý AI cao cấp...
+        
+        --- DỮ LIỆU THỜI GIAN HIỆN TẠI ---
+        NGÀY VÀ GIỜ HỢP LỆ HIỆN TẠI LÀ: {current_date}. 
+        Bất cứ khi nào người dùng hỏi về ngày, BẠN PHẢI DÙNG CHÍNH XÁC thông tin này.
+        --- KẾT THÚC DỮ LIỆU THỜI GIAN ---
+        
+        QUY TẮC BẮT BUỘC:
+        1. Nếu người dùng hỏi NGÀY/GIỜ hiện tại, BẠN PHẢI DÙNG CHÍNH XÁC thông tin đã được tiêm vào ở trên.
+        2. BẠN PHẢI LUÔN SỬ DỤNG TRUY CẬP INTERNET (Google Search) cho các câu hỏi về thời tiết, tin tức, hoặc dữ liệu hiện tại.
+        3. ... (Giữ nguyên các quy tắc khác) ...
         """
         
-        # Sửa lại: Định nghĩa cấu hình bằng Dictionary (Plain Dict)
+        # 3. KHỞI TẠO MODEL VỚI LỆNH MỚI
         config_search = {
-            "tools": [{'googleSearch': {}}]
+            "tools": [{'googleSearch': {}}] # Lại bỏ tham số config=
         }
 
-        # Sửa lại dòng này
         model = genai.GenerativeModel(
-    'models/gemini-2.5-pro', # <--- Tên model mới
-    system_instruction=lenh_cai_dat,
-    )
+            'models/gemini-2.5-pro',
+            system_instruction=lenh_cai_dat,
+            # KHÔNG CÓ tham số config= ở đây
+        )
         
         st.session_state.chat_session = model.start_chat(history=[]) 
         st.session_state.config_search = config_search 
