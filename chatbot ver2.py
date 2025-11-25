@@ -437,26 +437,25 @@ with st.container():
 
 # --- 8. XỬ LÝ LOGIC GỬI TIN ---
 if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
+   # --- BẮT ĐẦU if user_input: (Dán đoạn này ngay đầu khối xử lý tin nhắn) ---
     
     # --- LOGIC CHẶN LƯỢT DÙNG THỬ ---
-    # --- LOGIC CHẶN LƯỢT DÙNG THỬ (Sửa lại lệnh chuyển hướng) ---
     if st.session_state.get('user_role') == 'trial':
-     if st.session_state.trial_count >= TRIAL_LIMIT:
-        st.error(f"❌ Hết lượt dùng thử! Bạn đã dùng hết {TRIAL_LIMIT} câu hỏi. Đang chuyển về màn hình đăng nhập...")
         
-        # 1. Reset trạng thái đăng nhập
-        st.session_state.logged_in = False 
-        st.session_state.user_role = None 
-        st.session_state.trial_count = 0
-        
-        # 2. CHUYỂN HƯỚNG: Buộc Streamlit chạy lại từ đầu
-        st.rerun() 
-        
-    else:
-        # Tăng bộ đếm và thông báo lượt còn lại (như cũ)
-        st.session_state.trial_count += 1
-        st.info(f"💡 Lượt dùng thử còn lại: {TRIAL_LIMIT - st.session_state.trial_count} câu.")
-    # ... Tiếp tục logic xử lý lệnh /day và gửi tin nhắn   
+        # 1. KIỂM TRA LIMIT: Nếu count >= 3, thực hiện redirect
+        if st.session_state.trial_count >= TRIAL_LIMIT:
+            st.error(f"❌ Hết lượt dùng thử! Bạn đã dùng hết {TRIAL_LIMIT} câu hỏi. Đang chuyển về màn hình đăng nhập...")
+            
+            # RESET & REDIRECT
+            st.session_state.logged_in = False 
+            st.session_state.user_role = None 
+            st.session_state.trial_count = 0
+            st.rerun() # <--- LỆNH BẮT BUỘC ĐỂ QUAY LẠI TRANG CHỦ
+            
+        else:
+            # 2. Tăng bộ đếm và thông báo lượt còn lại
+            st.session_state.trial_count += 1 # Tăng bộ đếm TRƯỚC KHI xử lý tin nhắn
+            st.info(f"💡 Lượt dùng thử còn lại: {TRIAL_LIMIT - st.session_state.trial_count} câu.")  
     if user_input.lower().startswith("/day"):
         kien_thuc_moi = user_input[5:].strip() # Lấy nội dung sau /day
         if kien_thuc_moi:
