@@ -26,8 +26,14 @@ if "extra_knowledge" not in st.session_state:
     ]   
 if "chat_session" not in st.session_state:
     try: 
-        # 1. TÍNH TOÁN VÀ LƯU NGÀY CHÍNH XÁC (Ví dụ: Thứ Ba, ngày 25/11/2025)
-        current_date = datetime.now().strftime("%A, ngày %d/%m/%Y lúc %H:%M:%S") 
+        import pytz # Bắt buộc phải import pytz ở đây
+        
+        # 1. Đặt múi giờ về Việt Nam (ICT)
+        vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+        
+        # 2. TÍNH TOÁN NGÀY GIỜ CHÍNH XÁC (Dùng múi giờ VN và định dạng 12h)
+        current_datetime = datetime.now(vietnam_tz).strftime("%A, ngày %d/%m/%Y lúc %I:%M:%S %p") 
+        # Ví dụ: Thứ Ba, ngày 25/11/2025 lúc 11:19:17 PM    
     
         lenh_cai_dat = f"""
         Bạn là Lê Vũ Intelligence. Bạn là trợ lý AI cao cấp...
