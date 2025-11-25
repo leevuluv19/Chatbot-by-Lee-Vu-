@@ -401,7 +401,7 @@ if not st.session_state.logged_in:
 
                 # Dòng này phải chạy cuối cùng để lưu thay đổi
                 st.session_state.logged_in = False
-                st.stop()
+    st.stop()
 # --- PANEL QUẢN LÝ (ADMIN MỚI) ---
 if st.session_state.get("user_role") == "admin":
     with st.expander("🛠️ ADMIN: TẠO KEY BÁN HÀNG", expanded=False):
