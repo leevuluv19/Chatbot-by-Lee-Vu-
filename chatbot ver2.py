@@ -196,7 +196,7 @@ st.markdown("""
             #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
         );
         
-        animation: spin 4s linear infinite;
+        animation: spin 2s linear infinite;
         
         -webkit-mask: 
            linear-gradient(#fff 0 0) content-box, 
@@ -224,7 +224,7 @@ st.markdown("""
     }
     .liquid-glass {
         position: relative;
-        background: rgba(255, 255, 255, 0.0001); 
+        background: rgba(255, 255, 255, 0.00001); 
         
         backdrop-filter: blur(2px); 
         -webkit-backdrop-filter: blur(2px);
@@ -291,7 +291,7 @@ st.markdown("""
     /* ================= GIAO DIỆN NHƯ ẢNH 2 ================= */
     /* --- Style cho Thanh công cụ Upload (Expander) --- */
     .streamlit-expanderHeader {
-        background-color: rgba(255, 255, 255, 0.01) !important; /* Nền trong suốt nhẹ */
+        background-color: rgba(255, 255, 255, 0.001) !important; /* Nền trong suốt nhẹ */
         border-radius: 15px !important;
         border: 1px solid rgba(255,255,255,0.2) !important;
         color: white !important;
