@@ -102,37 +102,28 @@ def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
     return new_key, ngay_het_han.strftime("%d/%m/%Y")
 
 # [CẬP NHẬT] Hàm check đăng nhập kiểm tra hạn sử dụng
-def kiem_tra_dang_nhap(input_key, input_sdt):
-    # 1. Admin
-    if input_key == ADMIN_PASSWORD:
-        return True, "admin", "Chào Sếp Vũ!"
-    
-    # 2. Khách
+def khoa_sdt_trial(sdt_input):
+    """Kiểm tra và khóa SDT nếu đã dùng thử."""
     data = load_data()
-    if input_key in data:
-        thong_tin = data[input_key]
-        
-        # Check SĐT
-        if thong_tin.get("sdt") != input_sdt:
-            return False, None, "❌ Sai số điện thoại đăng ký!"
-        
-        # Check Hạn sử dụng
-        han_su_dung_str = thong_tin.get("expiry_date")
-        if han_su_dung_str:
-            han_su_dung = datetime.strptime(han_su_dung_str, "%Y-%m-%d %H:%M")
-            if datetime.now() > han_su_dung:
-                return False, None, "⚠️ Key đã HẾT HẠN! Vui lòng liên hệ Admin để gia hạn."
-        
-        # Nếu OK hết
-        con_lai = ""
-        if han_su_dung_str:
-             han_su_dung = datetime.strptime(han_su_dung_str, "%Y-%m-%d %H:%M")
-             so_ngay_con = (han_su_dung - datetime.now()).days
-             con_lai = f"(Còn {so_ngay_con} ngày)"
+    
+    # 1. Kiểm tra xem SDT này đã được đăng ký (mua key) chưa
+    for key, info in data.items():
+        if info.get("sdt") == sdt_input:
+            # Nếu đã mua key, thì không cần trial lock, nhưng vẫn không cho dùng trial nữa.
+            return True, "🔑 Số điện thoại này đã mua Key, vui lòng đăng nhập!"
 
-        return True, "user", f"Xin chào {input_sdt}! {con_lai}"
-            
-    return False, None, "❌ Key không tồn tại!"
+    # 2. Kiểm tra xem SDT này đã dùng Trial và bị khóa chưa
+    # Ta dùng một key giả định "TRIAL_LOCK" để lưu trạng thái khóa thử.
+    if "TRIAL_LOCK" not in data:
+        data["TRIAL_LOCK"] = {}
+        
+    if sdt_input in data["TRIAL_LOCK"]:
+        return True, "❌ Số điện thoại này đã dùng hết lượt dùng thử! Vui lòng mua Key."
+    
+    # Nếu chưa bị khóa, ta khóa lại và cho dùng thử
+    data["TRIAL_LOCK"][sdt_input] = True
+    save_data(data)
+    return False, None # Cho phép dùng thử
 
 
 st.markdown("""
@@ -344,6 +335,7 @@ if "user_role" not in st.session_state:
     st.session_state.user_role = None
 
 # --- LOGIC NÚT ĐĂNG NHẬP (Thay thế khối col1, col2, col3 cũ) ---
+# --- LOGIC NÚT ĐĂNG NHẬP & DÙNG THỬ (Thay thế khối col1, col2, col3 cũ) ---
 if not st.session_state.logged_in:
     # ... (Giữ nguyên phần st.markdown cho Title và Contact Info) ...
 
@@ -357,7 +349,7 @@ if not st.session_state.logged_in:
         
         with col_login:
             if st.button("ĐĂNG NHẬP 🚀", use_container_width=True):
-                # Logic đăng nhập Key
+                # Logic đăng nhập Key (Không đổi)
                 success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
                 if success:
                     st.session_state.logged_in = True
@@ -368,11 +360,23 @@ if not st.session_state.logged_in:
                     st.error(msg)
         
         with col_trial:
-            # Nút DÙNG THỬ
             if st.button(f"DÙNG THỬ ({TRIAL_LIMIT} câu)", use_container_width=True):
+                # 1. Bắt buộc nhập SDT để đăng ký Trial
+                if not input_sdt:
+                    st.error("⚠️ Vui lòng nhập SĐT để đăng ký dùng thử lần đầu.")
+                    st.stop()
+                    
+                # 2. Kiểm tra Trial Lock
+                is_locked, lock_msg = khoa_sdt_trial(input_sdt)
+                
+                if is_locked:
+                    st.error(lock_msg) # Hiển thị lỗi khóa
+                    st.stop()
+                
+                # 3. Cho phép dùng thử
                 st.session_state.logged_in = True
                 st.session_state.user_role = 'trial'
-                st.session_state.trial_count = 0 # Reset counter
+                st.session_state.trial_count = 0 # Bắt đầu từ 0
                 st.success(f"Chào mừng! Bạn có {TRIAL_LIMIT} câu hỏi để dùng thử.")
                 st.rerun() 
 
