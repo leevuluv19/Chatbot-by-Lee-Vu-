@@ -245,14 +245,14 @@ st.markdown("""
     font-size: 1.5rem; /* Kích thước nhỏ hơn Logo chính */
 }
 
-/* 2. Footer Text (Bottom Right) */
-.footer-text-fixed {
+/* 2. .footer-text-fixed {
     position: fixed;
     bottom: 15px;
     right: 20px;
     z-index: 1000;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.5); /* Chữ màu trắng mờ */
+    color: white; /* Đổi từ rgba(255,255,255,0.5) sang white */
+    opacity: 0.9; /* Giữ lại một chút mờ để mềm mại */
 }
     /* ẨN GIAO DIỆN CŨ */
     #MainMenu, footer, header {visibility: hidden;}
@@ -413,7 +413,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 2. FOOTER DESIGNED BY (BOTTOM RIGHT)
+# 2. FOOTER DESIGNED BY (BOTTOM RIGHT) <--- ĐẢM BẢO ĐOẠN NÀY ĐÃ CÓ
 st.markdown("""
 <div class="footer-text-fixed">
     Designed by Le Van Vu
