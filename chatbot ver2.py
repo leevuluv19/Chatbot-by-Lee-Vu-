@@ -421,9 +421,6 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
     
     # Lưu vào session state
     st.session_state.messages.append({"role": "user", "content": display_text})
-
-  # --- PHẦN GỬI TIN & XỬ LÝ STREAMING (Đã sửa lỗi config=) ---
-    # --- SỬA LẠI KHỐI CODE BÊN TRONG try: CỦA if user_input: ---
 try:
     inputs = [user_input]
     if image_to_send:
@@ -433,7 +430,9 @@ try:
         with st.spinner("Le Vu Intelligence đang suy nghĩ...."):
             
             # BƯỚC 1: LẤY CẤU HÌNH RA KHỎI SESSION STATE VÀ GỌI NÓ LÀ search_config
-            search_config = st.session_state.get("config_search", {}) 
+            config_search = {
+    "tools": [{'googleSearch': {}}]
+} 
 
             # BƯỚC 2: GỬI TIN NHẮN (Dùng tên biến đã được định nghĩa là search_config)
             response_stream = st.session_state.chat_session.send_message(
@@ -441,9 +440,6 @@ try:
     # DÒNG LỖI ĐÃ BỊ XÓA HẾT: config=search_config
     stream=True 
 )
-            
-           
-                
         bot_message_placeholder = st.empty()
         full_bot_reply = ""
                 
