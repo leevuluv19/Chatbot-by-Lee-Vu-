@@ -170,7 +170,7 @@ st.markdown("""
             #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
         );
         
-        animation: spin 4s linear infinite;
+        animation: spin 2s linear infinite;
         
         /* Mask để đục thủng giữa */
         -webkit-mask: 
