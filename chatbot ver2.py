@@ -403,13 +403,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 2. FOOTER DESIGNED BY (BOTTOM RIGHT) <--- ĐẢM BẢO ĐOẠN NÀY ĐÃ CÓ
-st.markdown("""
-<div class="footer-text-fixed">
-    Designed by Le Van Vu
-</div>
-""", unsafe_allow_html=True)
-
 # --- LOGIC NÚT ĐĂNG NHẬP VÀ DÙNG THỬ BẢO MẬT (Thay thế hoàn toàn khối with col2:) ---
 if not st.session_state.logged_in:
     
