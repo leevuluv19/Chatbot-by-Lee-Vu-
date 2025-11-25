@@ -423,29 +423,35 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
     st.session_state.messages.append({"role": "user", "content": display_text})
 
   # --- PHẦN GỬI TIN & XỬ LÝ STREAMING (Đã sửa lỗi config=) ---
-    try:
-        inputs = [user_input]
-        if image_to_send:
-            inputs.append(image_to_send)
+    # --- SỬA LẠI KHỐI CODE BÊN TRONG try: CỦA if user_input: ---
+try:
+    inputs = [user_input]
+    if image_to_send:
+        inputs.append(image_to_send)
 
-        with chat_container:
-            with st.spinner("Le Vu Intelligence đang suy nghĩ...."):
-                search_config = st.session_state.get("config_search", {}) 
+    with chat_container:
+        with st.spinner("Le Vu Intelligence đang suy nghĩ...."):
+            
+            # BƯỚC 1: LẤY CẤU HÌNH RA KHỎI SESSION STATE VÀ GỌI NÓ LÀ search_config
+            search_config = st.session_state.get("config_search", {}) 
 
-                # XÓA HOÀN TOÀN tham số config=search_config
-                response_stream = st.session_state.chat_session.send_message(
-                    content=inputs,
-                    stream=True 
-                )
+            # BƯỚC 2: GỬI TIN NHẮN (Dùng tên biến đã được định nghĩa là search_config)
+            response_stream = st.session_state.chat_session.send_message(
+                content=inputs,
+                config=search_config, # <--- Dùng search_config đã được định nghĩa an toàn
+                stream=True 
+            )
+            
+           
                 
-                bot_message_placeholder = st.empty()
-                full_bot_reply = ""
+        bot_message_placeholder = st.empty()
+        full_bot_reply = ""
                 
                 # Hiện khung chat rỗng để bắt đầu in chữ
-                st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div id="bot-response"></div></div></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div id="bot-response"></div></div></div>""", unsafe_allow_html=True)
                 
                 # Duyệt stream và in chữ
-                for chunk in response_stream:
+        for chunk in response_stream:
                     if chunk.text:
                         full_bot_reply += chunk.text
                         st.markdown(f"""
@@ -457,11 +463,11 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
                         </div>
                         """, unsafe_allow_html=True)
                         
-                bot_reply = full_bot_reply
+        bot_reply = full_bot_reply
 
         # Lưu vào session state sau khi stream xong
-        st.session_state.messages.append({"role": "assistant", "content": bot_reply})
-        
-    except Exception as e:
+    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+    
+except Exception as e:
         with chat_container:
             st.error(f"Lỗi: {e}")
