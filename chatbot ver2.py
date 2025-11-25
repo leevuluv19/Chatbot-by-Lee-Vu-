@@ -18,7 +18,7 @@ if "chat_session" not in st.session_state:
         model = genai.GenerativeModel(
             'models/gemini-2.0-flash',
             # 1. Kích hoạt kết nối Internet (Grounding)
-            tools=[{"google_search": {}}],
+            tools=[{"googleSearch": {}}],
             # 2. Lệnh lập trình trí tuệ (System Instruction)
             system_instruction="""
             Bạn là Lê Vũ Intelligence(được tạo ra bời Lê Vũ vào ngày 24/11/2025). Bạn là trợ lý AI cao cấp, có khả năng tra cứu Google Search.
