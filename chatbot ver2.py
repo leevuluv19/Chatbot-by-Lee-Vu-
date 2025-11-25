@@ -403,6 +403,13 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# 2. FOOTER DESIGNED BY (BOTTOM RIGHT) <--- ĐẢM BẢO ĐOẠN NÀY ĐÃ CÓ
+st.markdown("""
+<div class="footer-text-fixed">
+    Designed by Le Van Vu
+</div>
+""", unsafe_allow_html=True)
+
 # --- LOGIC NÚT ĐĂNG NHẬP VÀ DÙNG THỬ BẢO MẬT (Thay thế hoàn toàn khối with col2:) ---
 if not st.session_state.logged_in:
     
@@ -410,11 +417,11 @@ if not st.session_state.logged_in:
     with col2:
         
         # 1. LOGO, INPUTS (SDT, Key)
-        st.markdown(f"""
-    <div class="logo-glow header-logo-fixed">
-        Le Vu Intelligence
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("""
+        <div class="logo-glow">
+            LE VU INTELLIGENCE
+        </div>
+        """, unsafe_allow_html=True)
 
         input_sdt = st.text_input("Số điện thoại:", placeholder="Nhập SĐT của bạn...")
         input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key kích hoạt...", label_visibility="visible")
