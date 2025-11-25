@@ -7,6 +7,11 @@ import os
 from datetime import datetime, timedelta
 from datetime import datetime, timedelta
 # --- KHỞI TẠO CÁC BIẾN QUAN TRỌNG (Dán ngay đầu file, sau Import) ---
+TRIAL_LIMIT = 3 # Khách chỉ được chat thử 3 câu
+
+# Khởi tạo biến theo dõi lượt dùng thử
+if "trial_count" not in st.session_state:
+    st.session_state.trial_count = 0
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "extra_knowledge" not in st.session_state:
@@ -338,28 +343,39 @@ if "logged_in" not in st.session_state:
 if "user_role" not in st.session_state:
     st.session_state.user_role = None
 
+# --- LOGIC NÚT ĐĂNG NHẬP (Thay thế khối col1, col2, col3 cũ) ---
 if not st.session_state.logged_in:
-    st.markdown("""
-        <div class="title-container" style="margin-top: 100px;">
-            <div class="main-title">🔒 BẢO MẬT</div>
-            <div class="sub-title">Hệ thống "Trí tuệ nhân tạo của Le Vu"</div>
-        </div>
-    """, unsafe_allow_html=True)
-    
+    # ... (Giữ nguyên phần st.markdown cho Title và Contact Info) ...
+
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         input_sdt = st.text_input("Số điện thoại:", placeholder="Nhập SĐT của bạn...")
         input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key kích hoạt...", label_visibility="visible")
         
-        if st.button("ĐĂNG NHẬP 🚀", use_container_width=True):
-            success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
-            if success:
+        # Tạo hai cột cho 2 nút bấm
+        col_login, col_trial = st.columns(2)
+        
+        with col_login:
+            if st.button("ĐĂNG NHẬP 🚀", use_container_width=True):
+                # Logic đăng nhập Key
+                success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
+                if success:
+                    st.session_state.logged_in = True
+                    st.session_state.user_role = role
+                    st.success(msg)
+                    st.rerun()
+                else:
+                    st.error(msg)
+        
+        with col_trial:
+            # Nút DÙNG THỬ
+            if st.button(f"DÙNG THỬ ({TRIAL_LIMIT} câu)", use_container_width=True):
                 st.session_state.logged_in = True
-                st.session_state.user_role = role
-                st.success(msg)
-                st.rerun()
-            else:
-                st.error(msg)
+                st.session_state.user_role = 'trial'
+                st.session_state.trial_count = 0 # Reset counter
+                st.success(f"Chào mừng! Bạn có {TRIAL_LIMIT} câu hỏi để dùng thử.")
+                st.rerun() 
+
     st.stop()
 # --- PANEL QUẢN LÝ (ADMIN MỚI) ---
 if st.session_state.get("user_role") == "admin":
@@ -421,6 +437,23 @@ with st.container():
 
 # --- 8. XỬ LÝ LOGIC GỬI TIN ---
 if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
+    
+    # --- LOGIC CHẶN LƯỢT DÙNG THỬ ---
+    if st.session_state.get('user_role') == 'trial':
+        if st.session_state.trial_count >= TRIAL_LIMIT:
+            st.error(f"❌ Hết lượt dùng thử! Bạn đã dùng hết {TRIAL_LIMIT} câu hỏi.")
+            
+            # Reset trạng thái để khách thấy lại màn hình login
+            st.session_state.logged_in = False 
+            st.session_state.user_role = None 
+            st.session_state.trial_count = 0
+            st.stop()
+        else:
+            # Tăng bộ đếm và thông báo lượt còn lại
+            st.session_state.trial_count += 1
+            st.info(f"💡 Lượt dùng thử còn lại: {TRIAL_LIMIT - st.session_state.trial_count} câu.")
+
+    # ... Tiếp tục logic xử lý lệnh /day và gửi tin nhắn   
     if user_input.lower().startswith("/day"):
         kien_thuc_moi = user_input[5:].strip() # Lấy nội dung sau /day
         if kien_thuc_moi:
