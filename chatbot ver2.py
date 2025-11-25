@@ -245,15 +245,16 @@ st.markdown("""
     font-size: 1.5rem; /* Kích thước nhỏ hơn Logo chính */
 }
 
-/* 2..footer-text-fixed {
+/* 2.footer-text-fixed {
     position: fixed;
-    bottom: 15px; /* Giữ nguyên khoảng cách từ đáy */
-    left: 20px; /* Căn chỉnh từ lề trái */
-    right: auto; /* Tắt căn chỉnh từ lề phải */
+    bottom: 15px; /* Khoảng cách từ đáy */
+    left: 20px;  /* Căn chỉnh từ lề TRÁI */
+    
     z-index: 1000;
     font-size: 0.8rem;
     color: white; 
     opacity: 0.9;
+}
     /* ẨN GIAO DIỆN CŨ */
     #MainMenu, footer, header {visibility: hidden;}
     .stChatMessageAvatarBackground {display: none !important;}
