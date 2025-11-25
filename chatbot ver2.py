@@ -409,18 +409,21 @@ if not st.session_state.logged_in:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         
-        # 1. LOGO, INPUTS (SDT, Key)
-        st.markdown("""
-        <div class="logo-glow">
-            LE VU INTELLIGENCE
-        </div>
-        """, unsafe_allow_html=True)
+        # 1. LOGO LE VU INTELLIGENCE (TOP RIGHT)
+     st.markdown(f"""
+    <div class="logo-glow header-logo-fixed">
+        Le Vu Intelligence
+    </div>
+    """, unsafe_allow_html=True)
 
-        input_sdt = st.text_input("Số điện thoại:", placeholder="Nhập SĐT của bạn...")
-        input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key kích hoạt...", label_visibility="visible")
-        
+    # 2. FOOTER DESIGNED BY (BOTTOM LEFT)
+    st.markdown("""
+    <div class="footer-text-fixed">
+        Designed by Le Van Vu
+    </div>
+    """, unsafe_allow_html=True)
         # 2. NÚT ĐĂNG NHẬP (Key Đã mua)
-        if st.button("ĐĂNG NHẬP 🚀", key="login_btn", use_container_width=True):
+if st.button("ĐĂNG NHẬP 🚀", key="login_btn", use_container_width=True):
             success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
             if success:
                 st.session_state.logged_in = True
@@ -431,7 +434,7 @@ if not st.session_state.logged_in:
                 st.error(msg)
         
         # 3. NÚT DÙNG THỬ (Có kiểm tra SDT và Khóa Trial)
-        if st.button(f"DÙNG THỬ ({TRIAL_LIMIT} câu)", key="trial_btn", use_container_width=True):
+if st.button(f"DÙNG THỬ ({TRIAL_LIMIT} câu)", key="trial_btn", use_container_width=True):
             if not input_sdt or not kiem_tra_sdt_vietnam(input_sdt):
                 st.error("⚠️ Vui lòng nhập SĐT Việt Nam hợp lệ để đăng ký dùng thử.")
                 st.stop()
@@ -449,7 +452,7 @@ if not st.session_state.logged_in:
             st.rerun()
 
         # 4. NÚT MUA KEY / LIÊN HỆ ZALO
-        if st.button(f"MUA KEY / LH ZALO", key="buy_btn", use_container_width=True):
+if st.button(f"MUA KEY / LH ZALO", key="buy_btn", use_container_width=True):
             st.info("Vui lòng liên hệ Admin qua Zalo để mua Key chính thức!")
             st.markdown(f"""
             <a href="https://zalo.me/{SDT_ADMIN}" target="_blank">
@@ -459,7 +462,7 @@ if not st.session_state.logged_in:
             </a>
             """, unsafe_allow_html=True)
             
-    st.stop()
+st.stop()
 # --- PANEL QUẢN LÝ (ADMIN MỚI) ---
 if st.session_state.get("user_role") == "admin":
     with st.expander("🛠️ ADMIN: TẠO KEY BÁN HÀNG", expanded=False):
