@@ -13,7 +13,7 @@ if "messages" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = [] # Đảm bảo danh sách tin nhắn luôn tồn tại
 
-if st.session_state.chat_session is None: # Sửa từ 'messages' sang 'chat_session' cho đúng logic
+if "chat_session" not in st.session_state:
     try: # <--- Dòng BẮT ĐẦU khối thử (try)
         model = genai.GenerativeModel(
             'models/gemini-2.0-flash',
