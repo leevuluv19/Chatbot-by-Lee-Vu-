@@ -10,21 +10,30 @@ if "messages" not in st.session_state:
     st.session_state.messages = []  # Tạo danh sách tin nhắn rỗng nếu chưa có
 if "chat_session" not in st.session_state:
     try: 
-        current_date = datetime.now().strftime("%A, ngày 25/11/2025") 
+        # BƯỚC 1: Lấy ngày hiện tại chính xác từ hệ thống Python
+        # datetime.now() đảm bảo luôn lấy ngày mới nhất (Ví dụ: 25/11/2025)
+        current_date = datetime.now().strftime("%A, ngày %d/%m/%Y") 
+        
+        # BƯỚC 2: Tiêm (Inject) dữ liệu thời gian vào bộ não Bot (system_instruction)
         lenh_cai_dat = f"""
-        ... (giữ nguyên toàn bộ nội dung lệnh cài đặt) ...
+        ... (giữ nguyên các quy tắc cũ) ...
+        
+        --- DỮ LIỆU THỜI GIAN HIỆN TẠI ---
+        NGÀY VÀ GIỜ HỢP LỆ HIỆN TẠI LÀ: {current_date}. 
+        Bất cứ khi nào người dùng hỏi về ngày, BẠN PHẢI DÙNG CHÍNH XÁC thông tin này.
+        --- KẾT THÚC DỮ LIỆU THỜI GIAN ---
+        
+        QUY TẮC BẮT BUỘC:
+        1. Nếu người dùng hỏi NGÀY/GIỜ hiện tại, BẠN PHẢI DÙNG CHÍNH XÁC thông tin đã được tiêm vào ở trên.
+        ... (các quy tắc khác) ...
         """
         
-        # Sửa lại: Định nghĩa cấu hình bằng Dictionary (Plain Dict)
-        config_search = {
-            "tools": [{'googleSearch': {}}]
-        }
-
-        # Sửa lại dòng này
+        # Khởi tạo Model (không còn lỗi do config=)
         model = genai.GenerativeModel(
-    'models/gemini-2.5-pro', # <--- Tên model mới
-    system_instruction=lenh_cai_dat,
-    )
+            'models/gemini-2.5-pro',
+            system_instruction=lenh_cai_dat,
+            # KHÔNG CÓ tham số config= ở đây
+        )
         
         st.session_state.chat_session = model.start_chat(history=[]) 
         st.session_state.config_search = config_search 
