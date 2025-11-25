@@ -366,7 +366,9 @@ if "user_role" not in st.session_state:
 # --- LOGIC NÚT ĐĂNG NHẬP & MUA KEY (Xóa tính năng Trial) ---
 if not st.session_state.logged_in:
     # ... (Giữ nguyên các khối st.markdown Title và Contact Info) ...
+# --- Thêm dòng này vào ngay trước khi bạn bắt đầu dùng col_login và col_buy ---
 
+    col_login, col_buy = st.columns(2)
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         input_sdt = st.text_input("Số điện thoại:", placeholder="Nhập SĐT của bạn...")
