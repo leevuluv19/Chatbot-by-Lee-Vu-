@@ -236,6 +236,24 @@ st.markdown("""
         filter: blur(20px); 
         opacity: 1; /* Tăng độ sáng lên tối đa */
     }
+/* 1. Header Logo (Top Right) */
+.header-logo-fixed {
+    position: fixed;
+    top: 20px;
+    right: 40px; /* Căn chỉnh từ lề phải */
+    z-index: 1000; 
+    font-size: 1.5rem; /* Kích thước nhỏ hơn Logo chính */
+}
+
+/* 2. Footer Text (Bottom Right) */
+.footer-text-fixed {
+    position: fixed;
+    bottom: 15px;
+    right: 20px;
+    z-index: 1000;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5); /* Chữ màu trắng mờ */
+}
     /* ẨN GIAO DIỆN CŨ */
     #MainMenu, footer, header {visibility: hidden;}
     .stChatMessageAvatarBackground {display: none !important;}
@@ -388,6 +406,19 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_role" not in st.session_state:
     st.session_state.user_role = None
+    # 1. LOGO LE VU INTELLIGENCE (TOP RIGHT)
+st.markdown(f"""
+<div class="logo-glow header-logo-fixed">
+    Le Vu Intelligence
+</div>
+""", unsafe_allow_html=True)
+
+# 2. FOOTER DESIGNED BY (BOTTOM RIGHT)
+st.markdown("""
+<div class="footer-text-fixed">
+    Designed by Le Van Vu
+</div>
+""", unsafe_allow_html=True)
 
 # --- LOGIC NÚT ĐĂNG NHẬP VÀ DÙNG THỬ BẢO MẬT (Thay thế hoàn toàn khối with col2:) ---
 if not st.session_state.logged_in:
