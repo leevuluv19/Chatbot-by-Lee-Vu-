@@ -27,7 +27,7 @@ if "extra_knowledge" not in st.session_state:
 if "chat_session" not in st.session_state:
     try: 
         # 1. TÍNH TOÁN VÀ LƯU NGÀY CHÍNH XÁC (Ví dụ: Thứ Ba, ngày 25/11/2025)
-        current_date = datetime.now().strftime("Thứ ba, ngày 25/11/2025") 
+        current_date = datetime.now().strftime("%A, ngày %d/%m/%Y") 
     
         lenh_cai_dat = f"""
         Bạn là Lê Vũ Intelligence. Bạn là trợ lý AI cao cấp...
