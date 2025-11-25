@@ -44,7 +44,7 @@ if "chat_session" not in st.session_state:
         }
 
         model = genai.GenerativeModel(
-            'models/gemini-2.5-pro',
+            'models/gemini-2.5-flash',
             system_instruction=lenh_cai_dat,
             # KHÔNG CÓ tham số config= ở đây
         )
