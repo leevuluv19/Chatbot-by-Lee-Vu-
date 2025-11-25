@@ -10,7 +10,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []  # Tạo danh sách tin nhắn rỗng nếu chưa có
 if "chat_session" not in st.session_state:
     try: 
-        current_date = datetime.now().strftime("%A, ngày %d/%m/%Y") 
+        current_date = datetime.now().strftime("%A, ngày 25/11/2025") 
         lenh_cai_dat = f"""
         ... (giữ nguyên toàn bộ nội dung lệnh cài đặt) ...
         """
