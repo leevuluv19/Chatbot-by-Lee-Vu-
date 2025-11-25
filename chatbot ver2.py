@@ -9,21 +9,30 @@ from datetime import datetime, timedelta
 if "messages" not in st.session_state:
     st.session_state.messages = []  # Tạo danh sách tin nhắn rỗng nếu chưa có
 
-# --- KHỞI TẠO BOT (CÓ DẠY BẢO) ---
+# --- KHỐI CODE BẤT TỬ: KHỞI TẠO BỘ NHỚ & BOT (Dán vào dòng 13) ---
+if "messages" not in st.session_state:
+    st.session_state.messages = [] # Đảm bảo danh sách tin nhắn luôn tồn tại
+
 if "chat_session" not in st.session_state:
-    # Đây là câu lệnh cài vào não Bot
- try:
-    lenh_cai_dat = """
-    Bạn tên là: Le Vu Intelligence.
-    Người tạo ra bạn là: Lê Vũ .
-    Được sinh ra lúc 10:00 p.m 24/11/2025
-    Bất cứ khi nào người dùng hỏi "Ai tạo ra mày", "Admin là ai", hãy trả lời thật ngầu về Lê Vũ.
-    """
-    
-    model = genai.GenerativeModel('models/gemini-1.5-pro', tools=[{"google_search": {}}], system_instruction=lenh_cai_dat)
-    st.session_state.chat_session = model.start_chat(history=[])
- except:
-        pass # Bỏ qua nếu chưa config API key
+    st.session_state.chat_session = None # Tạo chỗ trống trước khi cấu hình
+
+try:
+    # 1. Cấu hình API Key (Lấy từ Secrets)
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=api_key)
+
+    # 2. Chỉ tạo Chat Session (Bộ não) nếu nó chưa tồn tại
+    if st.session_state.chat_session is None:
+        model = genai.GenerativeModel(
+            'models/gemini-1.5-pro', # Giữ nguyên bản Pro Sếp đang dùng
+            tools=[{"google_search": {}}], # Giữ nguyên tính năng tìm kiếm
+            system_instruction="Bạn là Lê Vũ Intelligence..."
+        )
+        st.session_state.chat_session = model.start_chat(history=[])
+
+except Exception as e:
+    st.error(f"⚠️ Lỗi cấu hình API: Vui lòng kiểm tra lại Key hoặc kết nối mạng. Chi tiết: {e}")
+    st.stop()
 # --- CẤU HÌNH ADMIN ---
 FILE_DATA = "key_data.json"
 SDT_ADMIN = "0376274345"
