@@ -373,28 +373,33 @@ if not st.session_state.logged_in:
         input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key kích hoạt...", label_visibility="visible")
         
         # TẠO HAI CỘT CHO 2 NÚT
-        col_login, col_buy = st.columns(2)
-        
-        with col_login:
-            if st.button("ĐĂNG NHẬP 🚀", use_container_width=True):
-                # Logic đăng nhập Key (Vẫn giữ nguyên)
-                success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
-                if success:
-                    st.session_state.logged_in = True
-                    st.session_state.user_role = role
-                    st.success(msg)
-                    st.rerun()
-                else:
-                    st.error(msg)
-        
         with col_buy:
-            # Nút MUA KEY / LIÊN HỆ (Thay thế nút Dùng thử)
             if st.button(f"MUA KEY / LH ZALO", use_container_width=True):
+                
+                # 1. Thông báo
                 st.info("Vui lòng liên hệ Admin qua Zalo để mua Key chính thức!")
-                # Thêm code chuyển hướng nếu bạn có link Zalo
-                # Ví dụ: st.markdown(f'<a href="https://zalo.me/0376274345" target="_blank">Click vào đây để chat Zalo</a>', unsafe_allow_html=True)
+                
+                # 2. TẠO LINK ZALO CÓ THỂ NHẤP VÀO
+                st.markdown(f"""
+                <a href="https://zalo.me/0376274345" target="_blank">
+                    <button style="
+                        background-color: #0088ff; 
+                        color: white; 
+                        padding: 10px 20px; 
+                        border: none; 
+                        border-radius: 5px; 
+                        cursor: pointer;
+                        font-size: 16px;
+                        margin-top: 10px; 
+                    ">
+                        CHAT ZALO VỚI ADMIN 📞
+                    </button>
+                </a>
+                """, unsafe_allow_html=True)
 
-    st.stop()
+                # Dòng này phải chạy cuối cùng để lưu thay đổi
+                st.session_state.logged_in = False
+                st.stop()
 # --- PANEL QUẢN LÝ (ADMIN MỚI) ---
 if st.session_state.get("user_role") == "admin":
     with st.expander("🛠️ ADMIN: TẠO KEY BÁN HÀNG", expanded=False):
