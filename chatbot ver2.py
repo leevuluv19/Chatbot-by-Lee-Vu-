@@ -437,10 +437,10 @@ try:
 
             # BƯỚC 2: GỬI TIN NHẮN (Dùng tên biến đã được định nghĩa là search_config)
             response_stream = st.session_state.chat_session.send_message(
-                content=inputs,
-                config=search_config, # <--- Dùng search_config đã được định nghĩa an toàn
-                stream=True 
-            )
+    content=inputs,
+    # DÒNG LỖI ĐÃ BỊ XÓA HẾT: config=search_config
+    stream=True 
+)
             
            
                 
