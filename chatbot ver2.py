@@ -66,33 +66,7 @@ FILE_DATA = "key_data.json"
 SDT_ADMIN = "0376274345"
 ADMIN_PASSWORD = "levudepzai" 
 
-def kiem_tra_sdt_vietnam(sdt):
-    """Kiểm tra SDT Việt Nam 10 số (bắt đầu bằng 0)"""
-    # Regex kiểm tra: bắt đầu bằng '0' và có tổng cộng 10 chữ số
-    if re.fullmatch(r'0\d{9}', sdt):
-        return True
-    return False
-def khoa_sdt_trial(sdt_input):
-    """Kiểm tra và khóa SDT nếu đã dùng thử."""
-    data = load_data()
-    
-    # 1. Kiểm tra xem SDT này đã mua Key (đã có trong data)
-    for key, info in data.items():
-        if info.get("sdt") == sdt_input:
-            return True, "🔑 Số điện thoại này đã mua Key, vui lòng đăng nhập!"
-
-    # 2. Kiểm tra xem SDT này đã dùng Trial và bị khóa chưa
-    if "TRIAL_LOCK" not in data:
-        data["TRIAL_LOCK"] = {}
-        
-    if sdt_input in data["TRIAL_LOCK"]:
-        return True, "❌ Số điện thoại này đã dùng hết lượt dùng thử! Vui lòng mua Key."
-    
-    # Nếu chưa bị khóa, ta khóa lại và cho dùng thử
-    data["TRIAL_LOCK"][sdt_input] = True
-    save_data(data)
-    return False, None # Cho phép dùng thử
-# --- HÀM XỬ LÝ DATA ---
+# --- HÀM XỬ LÝ DATA (Phụ thuộc) ---
 def load_data():
     if not os.path.exists(FILE_DATA):
         with open(FILE_DATA, 'w', encoding='utf-8') as f:
@@ -108,8 +82,14 @@ def save_data(data):
     with open(FILE_DATA, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
 
-# [CẬP NHẬT] Hàm tạo key nhận thêm số ngày sử dụng
-# --- HÀM TẠO KEY (Tao_key_moi) ---
+# --- HÀM KIỂM TRA ĐỊNH DẠNG (Validation) ---
+def kiem_tra_sdt_vietnam(sdt):
+    """Kiểm tra SDT Việt Nam 10 số (bắt đầu bằng 0)"""
+    if re.fullmatch(r'0\d{9}', sdt):
+        return True
+    return False
+
+# --- HÀM TẠO KEY MỚI (Tao_key_moi) ---
 def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
     data = load_data()
     phan_duoi = secrets.token_hex(4).upper() 
@@ -127,7 +107,7 @@ def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
         "note": ghi_chu
     }
     save_data(data)
-    return new_key, ngay_het_han.strftime("%d/%m/%Y") # <--- KẾT THÚC HÀM NÀY
+    return new_key, ngay_het_han.strftime("%d/%m/%Y")
 
 # --- HÀM KHÓA TRIAL (Khoa_sdt_trial) ---
 def khoa_sdt_trial(sdt_input):
