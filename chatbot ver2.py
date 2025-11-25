@@ -421,25 +421,22 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
 
         with chat_container:
             with st.spinner("Le Vu Intelligence đang suy nghĩ...."):
-                search_config = st.session_state.get("config_search", {}) 
-
-                # XÓA HOÀN TOÀN tham số config=search_config
-                response_stream = st.session_state.chat_session.send_message(
-                    content=inputs,
-                    stream=True 
-                )
+                # BỎ DÒNG st.markdown(...) ĐỂ HIỆN KHUNG CHAT RỖNG Ở ĐÂY
                 
-                bot_message_placeholder = st.empty()
+                # Tạo một placeholder duy nhất để cập nhật nội dung
+                bot_message_placeholder = st.empty() 
                 full_bot_reply = ""
                 
-                # Hiện khung chat rỗng để bắt đầu in chữ
-                st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div id="bot-response"></div></div></div>""", unsafe_allow_html=True)
+                response_stream = st.session_state.chat_session.send_message(
+                    content=inputs,
+                    stream=True
+                )
                 
-                # Duyệt stream và in chữ
+                # Duyệt qua từng đoạn response và CẬP NHẬT placeholder
                 for chunk in response_stream:
                     if chunk.text:
                         full_bot_reply += chunk.text
-                        st.markdown(f"""
+                        bot_message_placeholder.markdown(f"""
                         <div class="bot-row">
                             <div class="liquid-glass">
                                 <span class="icon">🤖</span> 
@@ -448,7 +445,7 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
                         </div>
                         """, unsafe_allow_html=True)
                         
-                bot_reply = full_bot_reply
+                bot_reply = full_bot_reply # Lưu kết quả cuối cùng
 
         # Lưu vào session state sau khi stream xong
         st.session_state.messages.append({"role": "assistant", "content": bot_reply})
