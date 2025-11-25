@@ -244,17 +244,6 @@ st.markdown("""
     z-index: 1000; 
     font-size: 1.5rem; /* Kích thước nhỏ hơn Logo chính */
 }
-
-/* 2.footer-text-fixed {
-    position: fixed;
-    bottom: 15px; /* Khoảng cách từ đáy */
-    left: 20px;  /* Căn chỉnh từ lề TRÁI */
-    
-    z-index: 1000;
-    font-size: 0.8rem;
-    color: white; 
-    opacity: 0.9;
-}
     /* ẨN GIAO DIỆN CŨ */
     #MainMenu, footer, header {visibility: hidden;}
     .stChatMessageAvatarBackground {display: none !important;}
@@ -411,13 +400,6 @@ if "user_role" not in st.session_state:
 st.markdown(f"""
 <div class="logo-glow header-logo-fixed">
     Le Vu Intelligence
-</div>
-""", unsafe_allow_html=True)
-
-# 2. FOOTER DESIGNED BY (BOTTOM RIGHT) <--- ĐẢM BẢO ĐOẠN NÀY ĐÃ CÓ
-st.markdown("""
-<div class="footer-text-fixed">
-    Designed by Le Van Vu
 </div>
 """, unsafe_allow_html=True)
 
