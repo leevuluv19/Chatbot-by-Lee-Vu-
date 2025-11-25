@@ -4,6 +4,7 @@ from PIL import Image
 import json
 import secrets
 import os
+import re
 from datetime import datetime, timedelta
 from datetime import datetime, timedelta
 # --- KHỞI TẠO CÁC BIẾN QUAN TRỌNG (Dán ngay đầu file, sau Import) ---
@@ -65,6 +66,32 @@ FILE_DATA = "key_data.json"
 SDT_ADMIN = "0376274345"
 ADMIN_PASSWORD = "levudepzai" 
 
+def kiem_tra_sdt_vietnam(sdt):
+    """Kiểm tra SDT Việt Nam 10 số (bắt đầu bằng 0)"""
+    # Regex kiểm tra: bắt đầu bằng '0' và có tổng cộng 10 chữ số
+    if re.fullmatch(r'0\d{9}', sdt):
+        return True
+    return False
+def khoa_sdt_trial(sdt_input):
+    """Kiểm tra và khóa SDT nếu đã dùng thử."""
+    data = load_data()
+    
+    # 1. Kiểm tra xem SDT này đã mua Key (đã có trong data)
+    for key, info in data.items():
+        if info.get("sdt") == sdt_input:
+            return True, "🔑 Số điện thoại này đã mua Key, vui lòng đăng nhập!"
+
+    # 2. Kiểm tra xem SDT này đã dùng Trial và bị khóa chưa
+    if "TRIAL_LOCK" not in data:
+        data["TRIAL_LOCK"] = {}
+        
+    if sdt_input in data["TRIAL_LOCK"]:
+        return True, "❌ Số điện thoại này đã dùng hết lượt dùng thử! Vui lòng mua Key."
+    
+    # Nếu chưa bị khóa, ta khóa lại và cho dùng thử
+    data["TRIAL_LOCK"][sdt_input] = True
+    save_data(data)
+    return False, None # Cho phép dùng thử
 # --- HÀM XỬ LÝ DATA ---
 def load_data():
     if not os.path.exists(FILE_DATA):
@@ -344,12 +371,11 @@ if not st.session_state.logged_in:
         input_sdt = st.text_input("Số điện thoại:", placeholder="Nhập SĐT của bạn...")
         input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key kích hoạt...", label_visibility="visible")
         
-        # Tạo hai cột cho 2 nút bấm
         col_login, col_trial = st.columns(2)
         
         with col_login:
             if st.button("ĐĂNG NHẬP 🚀", use_container_width=True):
-                # Logic đăng nhập Key (Không đổi)
+                # ... (Giữ nguyên logic đăng nhập Key cũ) ...
                 success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
                 if success:
                     st.session_state.logged_in = True
@@ -361,22 +387,28 @@ if not st.session_state.logged_in:
         
         with col_trial:
             if st.button(f"DÙNG THỬ ({TRIAL_LIMIT} câu)", use_container_width=True):
-                # 1. Bắt buộc nhập SDT để đăng ký Trial
+                
+                # 1. Bắt buộc nhập SDT
                 if not input_sdt:
                     st.error("⚠️ Vui lòng nhập SĐT để đăng ký dùng thử lần đầu.")
                     st.stop()
                     
-                # 2. Kiểm tra Trial Lock
+                # 2. KIỂM TRA ĐỊNH DẠNG HỢP LỆ
+                if not kiem_tra_sdt_vietnam(input_sdt):
+                    st.error("⚠️ SĐT không hợp lệ. Vui lòng nhập SĐT Việt Nam 10 số, bắt đầu bằng 0.")
+                    st.stop()
+                    
+                # 3. KIỂM TRA KHÓA (TRIAL LOCK)
                 is_locked, lock_msg = khoa_sdt_trial(input_sdt)
                 
                 if is_locked:
-                    st.error(lock_msg) # Hiển thị lỗi khóa
+                    st.error(lock_msg) 
                     st.stop()
                 
-                # 3. Cho phép dùng thử
+                # 4. Cho phép dùng thử (Lần đầu của SDT này)
                 st.session_state.logged_in = True
                 st.session_state.user_role = 'trial'
-                st.session_state.trial_count = 0 # Bắt đầu từ 0
+                st.session_state.trial_count = 0 
                 st.success(f"Chào mừng! Bạn có {TRIAL_LIMIT} câu hỏi để dùng thử.")
                 st.rerun() 
 
