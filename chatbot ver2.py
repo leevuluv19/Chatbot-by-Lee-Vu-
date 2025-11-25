@@ -413,36 +413,32 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
     # Lưu vào session state
     st.session_state.messages.append({"role": "user", "content": display_text})
 
-  # --- PHẦN GỬI TIN & XỬ LÝ STREAMING ---
+  # --- PHẦN GỬI TIN & XỬ LÝ STREAMING (Đã sửa lỗi config=) ---
     try:
         inputs = [user_input]
         if image_to_send:
             inputs.append(image_to_send)
 
-        # 1. Hiển thị tin nhắn chờ (Spinner)
         with chat_container:
             with st.spinner("Le Vu Intelligence đang suy nghĩ...."):
-                # Lấy cấu hình Search đã lưu
                 search_config = st.session_state.get("config_search", {}) 
 
-                # 2. Gửi tin nhắn bằng STREAMING (stream=True)
+                # XÓA HOÀN TOÀN tham số config=search_config
                 response_stream = st.session_state.chat_session.send_message(
-                    content=inputs, 
-                    config=search_config,
-                    stream=True # <--- BẬT STREAMING
+                    content=inputs,
+                    stream=True 
                 )
                 
-                # Khởi tạo container để bot in từng chữ một
                 bot_message_placeholder = st.empty()
                 full_bot_reply = ""
                 
+                # Hiện khung chat rỗng để bắt đầu in chữ
                 st.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class="icon">🤖</span> <div id="bot-response"></div></div></div>""", unsafe_allow_html=True)
                 
-                # 3. Duyệt qua từng đoạn response và hiển thị
+                # Duyệt stream và in chữ
                 for chunk in response_stream:
                     if chunk.text:
                         full_bot_reply += chunk.text
-                        # Cập nhật nội dung container liên tục
                         st.markdown(f"""
                         <div class="bot-row">
                             <div class="liquid-glass">
@@ -452,7 +448,7 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
                         </div>
                         """, unsafe_allow_html=True)
                         
-                bot_reply = full_bot_reply # Lưu kết quả cuối cùng
+                bot_reply = full_bot_reply
 
         # Lưu vào session state sau khi stream xong
         st.session_state.messages.append({"role": "assistant", "content": bot_reply})
