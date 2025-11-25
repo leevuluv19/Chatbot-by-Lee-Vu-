@@ -66,7 +66,10 @@ FILE_DATA = "key_data.json"
 SDT_ADMIN = "0376274345"
 ADMIN_PASSWORD = "levudepzai" 
 
-# --- HÀM XỬ LÝ DATA (Phụ thuộc) ---
+# --- BẮT ĐẦU KHỐI ĐỊNH NGHĨA HÀM CUỐI CÙNG ---
+
+import re # Cần thư viện này cho kiểm tra SDT
+
 def load_data():
     if not os.path.exists(FILE_DATA):
         with open(FILE_DATA, 'w', encoding='utf-8') as f:
@@ -82,14 +85,12 @@ def save_data(data):
     with open(FILE_DATA, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
 
-# --- HÀM KIỂM TRA ĐỊNH DẠNG (Validation) ---
 def kiem_tra_sdt_vietnam(sdt):
     """Kiểm tra SDT Việt Nam 10 số (bắt đầu bằng 0)"""
     if re.fullmatch(r'0\d{9}', sdt):
         return True
     return False
 
-# --- HÀM TẠO KEY MỚI (Tao_key_moi) ---
 def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
     data = load_data()
     phan_duoi = secrets.token_hex(4).upper() 
@@ -100,16 +101,12 @@ def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
     ngay_het_han = ngay_hien_tai + timedelta(days=so_ngay_dung)
     
     data[new_key] = {
-        "status": "active",
-        "sdt": sdt_khach,
-        "created_at": ngay_hien_tai.strftime("%Y-%m-%d %H:%M"),
-        "expiry_date": ngay_het_han.strftime("%Y-%m-%d %H:%M"), # Lưu ngày hết hạn
-        "note": ghi_chu
+        "status": "active", "sdt": sdt_khach, "created_at": ngay_hien_tai.strftime("%Y-%m-%d %H:%M"),
+        "expiry_date": ngay_het_han.strftime("%Y-%m-%d %H:%M"), "note": ghi_chu
     }
     save_data(data)
     return new_key, ngay_het_han.strftime("%d/%m/%Y")
 
-# --- HÀM KHÓA TRIAL (Khoa_sdt_trial) ---
 def khoa_sdt_trial(sdt_input):
     """Kiểm tra và khóa SDT nếu đã dùng thử."""
     data = load_data()
@@ -129,7 +126,39 @@ def khoa_sdt_trial(sdt_input):
     # 3. Nếu chưa bị khóa, ta khóa lại và cho dùng thử
     data["TRIAL_LOCK"][sdt_input] = True
     save_data(data)
-    return False, None # Cho phép dùng thử
+    return False, None
+
+def kiem_tra_dang_nhap(input_key, input_sdt):
+    """Kiểm tra đăng nhập cho User Key hoặc Admin Pass"""
+    # 1. Kiểm tra Admin
+    if input_key == ADMIN_PASSWORD and input_sdt == SDT_ADMIN:
+        return True, "admin", "Chào Sếp Vũ!"
+    
+    # 2. Kiểm tra User Key
+    data = load_data()
+    if input_key in data:
+        thong_tin = data[input_key]
+        
+        # Check SĐT và Hạn sử dụng
+        if thong_tin.get("sdt") != input_sdt:
+            return False, None, f"❌ Sai SĐT đăng ký! Cần hỗ trợ gọi: {SDT_ADMIN}"
+        
+        han_su_dung_str = thong_tin.get("expiry_date")
+        if han_su_dung_str:
+            han_su_dung = datetime.strptime(han_su_dung_str, "%Y-%m-%d %H:%M")
+            if datetime.now() > han_su_dung:
+                return False, None, f"⚠️ Key đã HẾT HẠN! Liên hệ {SDT_ADMIN} để gia hạn."
+
+        con_lai = ""
+        if han_su_dung_str:
+             so_ngay_con = (han_su_dung - datetime.now()).days
+             con_lai = f"(Còn {so_ngay_con} ngày)"
+
+        return True, "user", f"Xin chào {input_sdt}! {con_lai}"
+            
+    return False, None, f"❌ Key không tồn tại! Mua Key gọi: {SDT_ADMIN}"
+
+# --- KẾT THÚC KHỐI ĐỊNH NGHĨA HÀM ---
 st.markdown("""
 <style>
     [data-testid="stAppViewContainer"] {
@@ -361,10 +390,6 @@ if "logged_in" not in st.session_state:
 if "user_role" not in st.session_state:
     st.session_state.user_role = None
 
-# --- LOGIC NÚT ĐĂNG NHẬP (Thay thế khối col1, col2, col3 cũ) ---
-# --- LOGIC NÚT ĐĂNG NHẬP & DÙNG THỬ (Thay thế khối col1, col2, col3 cũ) ---
-# --- LOGIC NÚT ĐĂNG NHẬP & MUA KEY (Xóa tính năng Trial) ---
-# --- LOGIC NÚT ĐĂNG NHẬP & DÙNG THỬ BẢO MẬT (Đã thay đổi bố cục) ---
 if not st.session_state.logged_in:
     
     col1, col2, col3 = st.columns([1, 2, 1])
