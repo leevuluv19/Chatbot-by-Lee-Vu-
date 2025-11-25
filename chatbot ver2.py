@@ -39,7 +39,8 @@ if "chat_session" not in st.session_state:
         Bạn là Lê Vũ Intelligence. Bạn là trợ lý AI cao cấp...
         
         --- DỮ LIỆU THỜI GIAN HIỆN TẠI ---
-        NGÀY VÀ GIỜ HỢP LỆ HIỆN TẠI LÀ: {current_date}. 
+        NGÀY VÀ GIỜ HỢP LỆ HIỆN TẠI LÀ: {current_datetime}. 
+        # LỖI XẢY RA VÌ DÒNG NÀY VẪN LÀ {current_date} CŨ TRONG CODE CỦA BẠN
         Bất cứ khi nào người dùng hỏi về ngày, BẠN PHẢI DÙNG CHÍNH XÁC thông tin này.
         --- KẾT THÚC DỮ LIỆU THỜI GIAN ---
         
