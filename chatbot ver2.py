@@ -13,25 +13,26 @@ if "messages" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = [] # Đảm bảo danh sách tin nhắn luôn tồn tại
 
-if "chat_session" not in st.session_state:
-    st.session_state.chat_session = None # Tạo chỗ trống trước khi cấu hình
-
-try:
-    # 1. Cấu hình API Key (Lấy từ Secrets)
-    api_key = st.secrets["GOOGLE_API_KEY"]
-    genai.configure(api_key=api_key)
-
-    # 2. Chỉ tạo Chat Session (Bộ não) nếu nó chưa tồn tại
-    if st.session_state.chat_session is None:
+if st.session_state.chat_session is None: # Sửa từ 'messages' sang 'chat_session' cho đúng logic
+    try: # <--- Dòng BẮT ĐẦU khối thử (try)
         model = genai.GenerativeModel(
-            'models/gemini-2.0-flash', # Giữ nguyên bản Pro Sếp đang dùng
-            system_instruction="Bạn là Lê Vũ Intelligence..."
+            'models/gemini-2.0-flash',
+            # 1. Kích hoạt kết nối Internet (Grounding)
+            tools=[{"google_search": {}}],
+            # 2. Lệnh lập trình trí tuệ (System Instruction)
+            system_instruction="""
+            Bạn là Lê Vũ Intelligence(được tạo ra bời Lê Vũ vào ngày 24/11/2025). Bạn là trợ lý AI cao cấp, có khả năng tra cứu Google Search.
+            Cách xưng hô: Xưng 'tôi', gọi người dùng là 'bạn'. Phong cách Ngầu, quan tâm, súc tích.
+            BẠN PHẢI SỬ DỤNG TRUY CẬP INTERNET (Google Search) cho các câu hỏi về thời tiết, tin tức, hoặc dữ liệu hiện tại.
+            Không bao giờ được phép từ chối trả lời vì lý do 'dữ liệu quá khứ' nếu ngày đó là ngày hiện tại hoặc tương lai gần.
+            """
         )
-        st.session_state.chat_session = model.start_chat(history=[])
-
-except Exception as e:
-    st.error(f"⚠️ Lỗi cấu hình API: Vui lòng kiểm tra lại Key hoặc kết nối mạng. Chi tiết: {e}")
-    st.stop()
+        # Khởi tạo session sau khi model thành công
+        st.session_state.chat_session = model.start_chat(history=[]) # <--- Lệnh này phải nằm trong try
+        
+    except Exception as e: # <--- Dòng except đã được thụt lề đúng
+        st.error(f"⚠️ Lỗi cấu hình API: Vui lòng kiểm tra lại Key hoặc kết nối mạng. Chi tiết: {e}")
+        st.stop()
 # --- CẤU HÌNH ADMIN ---
 FILE_DATA = "key_data.json"
 SDT_ADMIN = "0376274345"
