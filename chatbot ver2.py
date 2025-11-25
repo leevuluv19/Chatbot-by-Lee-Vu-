@@ -5,20 +5,13 @@ import json
 import secrets
 import os
 from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 # --- KHỞI TẠO CÁC BIẾN QUAN TRỌNG (Dán ngay đầu file, sau Import) ---
 if "messages" not in st.session_state:
     st.session_state.messages = [] 
 if "extra_knowledge" not in st.session_state:
     # Thêm tất cả kiến thức về quán, Admin, và phong cách tại đây
-    st.session_state.extra_knowledge = [
-        # --- DANH TÍNH CỦA BOT & ADMIN ---
-        "Tôi là trí tuệ nhân tạo được phát triển bởi Admin Lê Vũ.",
-        "Hôm nay là 25/11/2025, từ giờ bạn phải nói đúng lịch",
-        "Gần hết hạn key thì phải nhắc khách còn bao nhiêu thời gian, Bảo khách IB với ADMIN Lê Vũ 0376274345"
-        "Phong cách giao tiếp của tôi là ngầu, súc tích và đôi khi hơi tinh nghịch.",
-        "Tên đầy đủ của người tạo ra tôi là Lê Văn Vũ, và anh ấy là Admin đẹp trai nhất Thanh Hóa.", ]
-     
-    st.session_state.extra_knowledge = []    
+    st.session_state.extra_knowledge  
 i# Đảm bảo dòng 'from datetime import datetime, timedelta' đã có ở đầu file
 
 if "chat_session" not in st.session_state:
