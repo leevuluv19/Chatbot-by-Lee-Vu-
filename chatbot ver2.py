@@ -426,11 +426,11 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
                 search_config = st.session_state.get("config_search", {}) 
 
 # Gửi tin nhắn kèm theo Cấu hình Search
-                response = st.session_state.chat_session.send_message(
-    contents=inputs, 
-    config=search_config # <--- TRUYỀN CẤU HÌNH VÀO LỆNH GỬI TIN
+        response = st.session_state.chat_session.send_message(
+    content=inputs, # <--- SỬA THÀNH SỐ ÍT (content)
+    config=search_config
 )
-                bot_reply = response.text
+        bot_reply = response.text
         
         # Hiện tin nhắn Bot
         with chat_container:
