@@ -428,7 +428,6 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
 # Gửi tin nhắn kèm theo Cấu hình Search
         response = st.session_state.chat_session.send_message(
     content=inputs, # <--- SỬA THÀNH SỐ ÍT (content)
-    config=search_config
 )
         bot_reply = response.text
         
