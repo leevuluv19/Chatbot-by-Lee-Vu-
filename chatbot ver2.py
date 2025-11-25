@@ -5,32 +5,33 @@ import json
 import secrets
 import os
 from datetime import datetime, timedelta
+from google.generativeai.types import GenerateContentConfig
 # --- KHỞI TẠO CÁC BIẾN QUAN TRỌNG (Dán ngay đầu file, sau Import) ---
 if "messages" not in st.session_state:
     st.session_state.messages = []  # Tạo danh sách tin nhắn rỗng nếu chưa có
-
-# --- KHỐI CODE BẤT TỬ: KHỞI TẠO BỘ NHỚ & BOT (Dán vào dòng 13) ---
-if "messages" not in st.session_state:
-    st.session_state.messages = [] # Đảm bảo danh sách tin nhắn luôn tồn tại
-
 if "chat_session" not in st.session_state:
-    try: # <--- Dòng BẮT ĐẦU khối thử (try)
+    try: 
+        lenh_cai_dat = """
+        Bạn là Lê Vũ Intelligence. Bạn là trợ lý AI cao cấp, có khả năng tra cứu Google Search.
+        Cách xưng hô: Xưng 'ảnh', gọi người dùng là 'em'. Phong cách Ngầu, quan tâm, súc tích.
+        BẠN PHẢI SỬ DỤNG TRUY CẬP INTERNET (Google Search) cho các câu hỏi về thời tiết, tin tức, hoặc dữ liệu hiện tại.
+        Không bao giờ được phép từ chối trả lời vì lý do 'dữ liệu quá khứ' nếu ngày đó là ngày hiện tại hoặc tương lai gần.
+        """
+        
+        # Tách riêng cấu hình tìm kiếm (Grounding)
+        config_search = GenerateContentConfig(
+            tools=[{'googleSearch': {}}]
+        )
+
         model = genai.GenerativeModel(
             'models/gemini-2.0-flash',
-            # 1. Kích hoạt kết nối Internet (Grounding)
-            tools=[{"googleSearch": {}}],
-            # 2. Lệnh lập trình trí tuệ (System Instruction)
-            system_instruction="""
-            Bạn là Lê Vũ Intelligence(được tạo ra bời Lê Vũ vào ngày 24/11/2025). Bạn là trợ lý AI cao cấp, có khả năng tra cứu Google Search.
-            Cách xưng hô: Xưng 'tôi', gọi người dùng là 'bạn'. Phong cách Ngầu, quan tâm, súc tích.
-            BẠN PHẢI SỬ DỤNG TRUY CẬP INTERNET (Google Search) cho các câu hỏi về thời tiết, tin tức, hoặc dữ liệu hiện tại.
-            Không bao giờ được phép từ chối trả lời vì lý do 'dữ liệu quá khứ' nếu ngày đó là ngày hiện tại hoặc tương lai gần.
-            """
+            system_instruction=lenh_cai_dat,
+            config=config_search # Dùng tham số config để bật search
         )
-        # Khởi tạo session sau khi model thành công
-        st.session_state.chat_session = model.start_chat(history=[]) # <--- Lệnh này phải nằm trong try
         
-    except Exception as e: # <--- Dòng except đã được thụt lề đúng
+        st.session_state.chat_session = model.start_chat(history=[]) 
+        
+    except Exception as e:
         st.error(f"⚠️ Lỗi cấu hình API: Vui lòng kiểm tra lại Key hoặc kết nối mạng. Chi tiết: {e}")
         st.stop()
 # --- CẤU HÌNH ADMIN ---
