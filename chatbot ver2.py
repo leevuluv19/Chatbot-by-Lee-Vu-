@@ -8,12 +8,7 @@ from datetime import datetime, timedelta
 from datetime import datetime, timedelta
 # --- KHỞI TẠO CÁC BIẾN QUAN TRỌNG (Dán ngay đầu file, sau Import) ---
 if "messages" not in st.session_state:
-    st.session_state.messages = [] 
-if "extra_knowledge" not in st.session_state:
-    # Thêm tất cả kiến thức về quán, Admin, và phong cách tại đây
-    st.session_state.extra_knowledge  
-i# Đảm bảo dòng 'from datetime import datetime, timedelta' đã có ở đầu file
-
+    st.session_state.messages = []
 if "chat_session" not in st.session_state:
     try: 
         # 1. TÍNH TOÁN VÀ LƯU NGÀY CHÍNH XÁC (Ví dụ: Thứ Ba, ngày 25/11/2025)
