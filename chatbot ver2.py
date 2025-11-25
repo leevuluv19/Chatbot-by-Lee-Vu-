@@ -350,7 +350,17 @@ st.markdown("""
         border: none !important;
         padding-left: 15px !important;
     }
-
+.logo-glow {
+    text-align: center;
+    font-size: 1.8rem; /* Kích thước logo */
+    font-weight: 800;
+    color: white;
+    /* Royal Blue Shadow (Xanh Hoàng Gia: RGB 65, 105, 225) */
+    text-shadow: 0 0 12px rgba(65, 105, 225, 1), /* Sáng mạnh */
+                 0 0 20px rgba(65, 105, 225, 0.6); /* Tỏa sáng rộng */
+    margin-top: 15px; 
+    margin-bottom: 30px;
+}
     /* Tối ưu khoảng cách container chính */
     .block-container { padding-bottom: 100px !important; }
 </style>
@@ -364,43 +374,58 @@ if "user_role" not in st.session_state:
 # --- LOGIC NÚT ĐĂNG NHẬP (Thay thế khối col1, col2, col3 cũ) ---
 # --- LOGIC NÚT ĐĂNG NHẬP & DÙNG THỬ (Thay thế khối col1, col2, col3 cũ) ---
 # --- LOGIC NÚT ĐĂNG NHẬP & MUA KEY (Xóa tính năng Trial) ---
+# --- LOGIC NÚT ĐĂNG NHẬP & DÙNG THỬ BẢO MẬT (Đã thay đổi bố cục) ---
 if not st.session_state.logged_in:
-    # ... (Giữ nguyên các khối st.markdown Title và Contact Info) ...
-# --- Thêm dòng này vào ngay trước khi bạn bắt đầu dùng col_login và col_buy ---
-
-    col_login, col_buy = st.columns(2)
+    
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
+        
+        # 1. LOGO: THÊM TEXT "LE VU INTELLIGENCE" (Dùng CSS mới)
+        st.markdown("""
+        <div class="logo-glow">
+            LE VU INTELLIGENCE
+        </div>
+        """, unsafe_allow_html=True)
+
+        # 2. INPUTS (SĐT & KEY)
         input_sdt = st.text_input("Số điện thoại:", placeholder="Nhập SĐT của bạn...")
         input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key kích hoạt...", label_visibility="visible")
         
-        # TẠO HAI CỘT CHO 2 NÚT
-        with col_buy:
-            if st.button(f"MUA KEY / LH ZALO", use_container_width=True):
-                
-                # 1. Thông báo
-                st.info("Vui lòng liên hệ Admin qua Zalo để mua Key chính thức!")
-                
-                # 2. TẠO LINK ZALO CÓ THỂ NHẤP VÀO
-                st.markdown(f"""
-                <a href="https://zalo.me/0376274345" target="_blank">
-                    <button style="
-                        background-color: #0088ff; 
-                        color: white; 
-                        padding: 10px 20px; 
-                        border: none; 
-                        border-radius: 5px; 
-                        cursor: pointer;
-                        font-size: 16px;
-                        margin-top: 10px; 
-                    ">
-                        CHAT ZALO VỚI ADMIN 📞
-                    </button>
-                </a>
-                """, unsafe_allow_html=True)
-
-                # Dòng này phải chạy cuối cùng để lưu thay đổi
-                st.session_state.logged_in = False
+        # 3. NÚT ĐĂNG NHẬP (Full width, nằm thẳng hàng dọc với inputs)
+        if st.button("ĐĂNG NHẬP 🚀", use_container_width=True):
+            success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
+            if success:
+                st.session_state.logged_in = True
+                st.session_state.user_role = role
+                st.success(msg)
+                st.rerun()
+            else:
+                st.error(msg)
+        
+        # 4. NÚT MUA KEY / LIÊN HỆ ZALO (Nằm dưới nút ĐĂNG NHẬP)
+        if st.button(f"MUA KEY / LH ZALO", use_container_width=True):
+            
+            st.info("Vui lòng liên hệ Admin qua Zalo để mua Key chính thức!")
+            
+            # Tạo link Zalo (Button style)
+            st.markdown(f"""
+            <a href="https://zalo.me/{SDT_ADMIN}" target="_blank">
+                <button style="
+                    background-color: #0088ff; 
+                    color: white; 
+                    padding: 10px 20px; 
+                    border: none; 
+                    border-radius: 5px; 
+                    cursor: pointer;
+                    font-size: 16px;
+                    margin-top: 10px; 
+                ">
+                    CHAT ZALO VỚI ADMIN 📞
+                </button>
+            </a>
+            """, unsafe_allow_html=True)
+            
+        # Dòng này phải chạy cuối cùng của khối Login
     st.stop()
 # --- PANEL QUẢN LÝ (ADMIN MỚI) ---
 if st.session_state.get("user_role") == "admin":
