@@ -20,7 +20,7 @@ if "chat_session" not in st.session_state:
     Bất cứ khi nào người dùng hỏi "Ai tạo ra mày", "Admin là ai", hãy trả lời thật ngầu về Lê Vũ.
     """
     
-    model = genai.GenerativeModel('models/gemini-2.0-flash', system_instruction=lenh_cai_dat)
+    model = genai.GenerativeModel('models/gemini-1.5-pro', tools=[{"google_search": {}}], system_instruction=lenh_cai_dat)
     st.session_state.chat_session = model.start_chat(history=[])
  except:
         pass # Bỏ qua nếu chưa config API key
