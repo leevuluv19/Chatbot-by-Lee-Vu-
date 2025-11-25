@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from datetime import datetime, timedelta
 # --- KHỞI TẠO CÁC BIẾN QUAN TRỌNG (Dán ngay đầu file, sau Import) ---
 TRIAL_LIMIT = 3 # Khách chỉ được chat thử 3 câu
-
 # Khởi tạo biến theo dõi lượt dùng thử
 if "trial_count" not in st.session_state:
     st.session_state.trial_count = 0
@@ -156,7 +155,7 @@ def kiem_tra_dang_nhap(input_key, input_sdt):
 
         return True, "user", f"Xin chào {input_sdt}! {con_lai}"
             
-    return False, None, f"❌ Key không tồn tại! Mua Key gọi: {SDT_ADMIN}"
+    return False, None, f"❌ Key không tồn tại! Vui lòng mua Key bên dưới! "
 
 # --- KẾT THÚC KHỐI ĐỊNH NGHĨA HÀM ---
 st.markdown("""
@@ -390,24 +389,24 @@ if "logged_in" not in st.session_state:
 if "user_role" not in st.session_state:
     st.session_state.user_role = None
 
+# --- LOGIC NÚT ĐĂNG NHẬP VÀ DÙNG THỬ BẢO MẬT (Thay thế hoàn toàn khối with col2:) ---
 if not st.session_state.logged_in:
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         
-        # 1. LOGO: THÊM TEXT "LE VU INTELLIGENCE" (Dùng CSS mới)
+        # 1. LOGO, INPUTS (SDT, Key)
         st.markdown("""
         <div class="logo-glow">
             LE VU INTELLIGENCE
         </div>
         """, unsafe_allow_html=True)
 
-        # 2. INPUTS (SĐT & KEY)
         input_sdt = st.text_input("Số điện thoại:", placeholder="Nhập SĐT của bạn...")
         input_key = st.text_input("Mã Key:", type="password", placeholder="Nhập Key kích hoạt...", label_visibility="visible")
         
-        # 3. NÚT ĐĂNG NHẬP (Full width, nằm thẳng hàng dọc với inputs)
-        if st.button("ĐĂNG NHẬP 🚀", use_container_width=True):
+        # 2. NÚT ĐĂNG NHẬP (Key Đã mua)
+        if st.button("ĐĂNG NHẬP 🚀", key="login_btn", use_container_width=True):
             success, role, msg = kiem_tra_dang_nhap(input_key, input_sdt)
             if success:
                 st.session_state.logged_in = True
@@ -417,30 +416,35 @@ if not st.session_state.logged_in:
             else:
                 st.error(msg)
         
-        # 4. NÚT MUA KEY / LIÊN HỆ ZALO (Nằm dưới nút ĐĂNG NHẬP)
-        if st.button(f"MUA KEY / LH ZALO", use_container_width=True):
+        # 3. NÚT DÙNG THỬ (Có kiểm tra SDT và Khóa Trial)
+        if st.button(f"DÙNG THỬ ({TRIAL_LIMIT} câu)", key="trial_btn", use_container_width=True):
+            if not input_sdt or not kiem_tra_sdt_vietnam(input_sdt):
+                st.error("⚠️ Vui lòng nhập SĐT Việt Nam hợp lệ để đăng ký dùng thử.")
+                st.stop()
+                
+            is_locked, lock_msg = khoa_sdt_trial(input_sdt)
+            if is_locked:
+                st.error(lock_msg) 
+                st.stop()
             
+            # Cho phép dùng thử
+            st.session_state.logged_in = True
+            st.session_state.user_role = 'trial'
+            st.session_state.trial_count = 0
+            st.success(f"Chào mừng! Bạn có {TRIAL_LIMIT} câu hỏi để dùng thử.")
+            st.rerun()
+
+        # 4. NÚT MUA KEY / LIÊN HỆ ZALO
+        if st.button(f"MUA KEY / LH ZALO", key="buy_btn", use_container_width=True):
             st.info("Vui lòng liên hệ Admin qua Zalo để mua Key chính thức!")
-            
-            # Tạo link Zalo (Button style)
             st.markdown(f"""
             <a href="https://zalo.me/{SDT_ADMIN}" target="_blank">
-                <button style="
-                    background-color: #0088ff; 
-                    color: white; 
-                    padding: 10px 20px; 
-                    border: none; 
-                    border-radius: 5px; 
-                    cursor: pointer;
-                    font-size: 16px;
-                    margin-top: 10px; 
-                ">
+                <button style="background-color: #0088ff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px;">
                     CHAT ZALO VỚI ADMIN 📞
                 </button>
             </a>
             """, unsafe_allow_html=True)
             
-        # Dòng này phải chạy cuối cùng của khối Login
     st.stop()
 # --- PANEL QUẢN LÝ (ADMIN MỚI) ---
 if st.session_state.get("user_role") == "admin":
