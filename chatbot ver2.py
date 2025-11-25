@@ -24,7 +24,7 @@ try:
     # 2. Chỉ tạo Chat Session (Bộ não) nếu nó chưa tồn tại
     if st.session_state.chat_session is None:
         model = genai.GenerativeModel(
-            'models/gemini-1.5-pro', # Giữ nguyên bản Pro Sếp đang dùng
+            'models/gemini-2.0-flash', # Giữ nguyên bản Pro Sếp đang dùng
             system_instruction="Bạn là Lê Vũ Intelligence..."
         )
         st.session_state.chat_session = model.start_chat(history=[])
