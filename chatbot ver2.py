@@ -25,7 +25,6 @@ try:
     if st.session_state.chat_session is None:
         model = genai.GenerativeModel(
             'models/gemini-1.5-pro', # Giữ nguyên bản Pro Sếp đang dùng
-            tools=[{"google_search": {}}], # Giữ nguyên tính năng tìm kiếm
             system_instruction="Bạn là Lê Vũ Intelligence..."
         )
         st.session_state.chat_session = model.start_chat(history=[])
