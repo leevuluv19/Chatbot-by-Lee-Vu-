@@ -352,12 +352,12 @@ st.markdown("""
     }
 .logo-glow {
     text-align: center;
-    font-size: 1.8rem; /* Kích thước logo */
+    font-size: 2.5rem; /* Kích thước logo */
     font-weight: 800;
     color: white;
     /* Royal Blue Shadow (Xanh Hoàng Gia: RGB 65, 105, 225) */
     text-shadow: 0 0 12px rgba(65, 105, 225, 1), /* Sáng mạnh */
-                 0 0 20px rgba(65, 105, 225, 0.6); /* Tỏa sáng rộng */
+                 0 0 20px rgba(65, 105, 225, 1); /* Tỏa sáng rộng */
     margin-top: 15px; 
     margin-bottom: 30px;
 }
