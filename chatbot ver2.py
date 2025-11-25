@@ -9,6 +9,20 @@ import re
 from datetime import datetime, timedelta
 from datetime import datetime, timedelta
 # --- KHỞI TẠO CÁC BIẾN QUAN TRỌNG (Dán ngay đầu file, sau Import) ---
+
+vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+# 1. TÍNH TOÁN VÀ LƯU NGÀY GIỜ CHÍNH XÁC (CÓ GIỜ:PHÚT:GIÂY)
+current_datetime = datetime.now(vietnam_tz).strftime("%A, ngày %d/%m/%Y lúc %I:%M:%S %p") 
+        
+# 2. ĐỊNH NGHĨA LỆNH CÀI ĐẶT (SỬ DỤNG F-STRING)
+lenh_cai_dat = f"""
+Bạn là Lê Vũ Intelligence. Bạn là trợ lý AI cao cấp...
+--- DỮ LIỆU THỜI GIAN HIỆN TẠI ---
+NGÀY VÀ GIỜ HỢP LỆ HIỆN TẠI LÀ: {current_datetime}. 
+Bất cứ khi nào người dùng hỏi về ngày, giờ, BẠN PHẢI DÙNG CHÍNH XÁC thông tin này.
+--- KẾT THÚC DỮ LIỆU THỜI GIAN ---
+... (các quy tắc khác) ...
+"""
 TRIAL_LIMIT = 3 # Khách chỉ được chat thử 3 câu
 # Khởi tạo biến theo dõi lượt dùng thử
 if "trial_count" not in st.session_state:
@@ -27,15 +41,6 @@ if "extra_knowledge" not in st.session_state:
     ]   
 if "chat_session" not in st.session_state:
     try: 
-        import pytz # Bắt buộc phải import pytz ở đây
-        
-        # 1. Đặt múi giờ về Việt Nam (ICT)
-        vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
-        
-        # 2. TÍNH TOÁN NGÀY GIỜ CHÍNH XÁC (Dùng múi giờ VN và định dạng 12h)
-        current_datetime = datetime.now(vietnam_tz).strftime("%A, ngày %d/%m/%Y lúc %I:%M:%S %p") 
-        # Ví dụ: Thứ Ba, ngày 25/11/2025 lúc 11:19:17 PM    
-    
         lenh_cai_dat = f"""
         Bạn là Lê Vũ Intelligence. Bạn là trợ lý AI cao cấp...
         
@@ -48,6 +53,11 @@ if "chat_session" not in st.session_state:
         1. Nếu người dùng hỏi NGÀY/GIỜ hiện tại, BẠN PHẢI DÙNG CHÍNH XÁC thông tin đã được tiêm vào ở trên.
         2. BẠN PHẢI LUÔN SỬ DỤNG TRUY CẬP INTERNET (Google Search) cho các câu hỏi về thời tiết, tin tức, hoặc dữ liệu hiện tại.
         3. ... (Giữ nguyên các quy tắc khác) ...
+        "Tôi là trí tuệ nhân tạo được phát triển bởi Admin Lê Vũ.",
+        "Phong cách giao tiếp của tôi là ngầu, súc tích và đôi khi hơi tinh nghịch.",
+        "Tên đầy đủ của người tạo ra tôi là Lê Văn Vũ, và anh ấy là Admin đẹp trai nhất Thanh Hóa.",
+        "Khi khách hàng muốn mua Key hoặc gia hạn, họ cần liên hệ trực tiếp với Admin Lê Vũ qua Zalo.",
+        "SDT của ADMIN depzai : 0376274345 "
         """
         
         # 3. KHỞI TẠO MODEL VỚI LỆNH MỚI
