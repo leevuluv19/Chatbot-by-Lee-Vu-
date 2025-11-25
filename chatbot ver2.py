@@ -20,11 +20,11 @@ if "chat_session" not in st.session_state:
             "tools": [{'googleSearch': {}}]
         }
 
+        # Sửa lại dòng này
         model = genai.GenerativeModel(
-            'models/gemini-2.0-flash',
-            system_instruction=lenh_cai_dat,
-            # XÓA HOÀN TOÀN DÒNG config=config_search Ở ĐÂY
-        )
+    'models/gemini-2.5-pro', # <--- Tên model mới
+    system_instruction=lenh_cai_dat,
+    )
         
         st.session_state.chat_session = model.start_chat(history=[]) 
         st.session_state.config_search = config_search 
