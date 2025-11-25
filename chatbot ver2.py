@@ -361,6 +361,19 @@ st.markdown("""
     margin-top: 15px; 
     margin-bottom: 30px;
 }
+/* --- OVERRIDE STYLE CHO HỘP THÔNG BÁO (st.info, st.error, etc.) --- */
+[data-testid="stAlert"] {
+    /* NỀN: Làm tối và trong suốt (50% đục) */
+    background-color: rgba(0, 0, 0, 0.5) !important; 
+    
+    /* VIỀN: Làm viền Neon xanh (Tùy chọn: bạn có thể xóa dòng này nếu không thích) */
+    border: 1px solid #00C6FF !important; 
+    
+    border-radius: 10px !important;
+    
+    /* CHỮ: Đảm bảo chữ trắng để dễ đọc trên nền tối */
+    color: white !important; 
+}            
     /* Tối ưu khoảng cách container chính */
     .block-container { padding-bottom: 100px !important; }
 </style>
