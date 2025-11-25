@@ -10,22 +10,9 @@ if "messages" not in st.session_state:
     st.session_state.messages = []  # Tạo danh sách tin nhắn rỗng nếu chưa có
 if "chat_session" not in st.session_state:
     try: 
-        # Lấy ngày hiện tại chính xác từ hệ thống Python
         current_date = datetime.now().strftime("%A, ngày %d/%m/%Y") 
-        
         lenh_cai_dat = f"""
-        Bạn là Lê Vũ Intelligence. Bạn là trợ lý AI cao cấp, có khả năng tra cứu Google Search.
-        Cách xưng hô: Xưng 'ảnh', gọi người dùng là 'em'. Phong cách Ngầu, quan tâm, súc tích.
-        
-        --- DỮ LIỆU THỜI GIAN HIỆN TẠI ---
-        NGÀY VÀ GIỜ HỢP LỆ HIỆN TẠI LÀ: {current_date}. (Dùng thông tin này cho mọi câu hỏi về thời gian)
-        --- KẾT THÚC DỮ LIỆU THỜI GIAN ---
-        
-        QUY TẮC BẮT BUỘC:
-        1. Nếu người dùng hỏi NGÀY/GIỜ hiện tại, BẠN PHẢI DÙNG CHÍNH XÁC thông tin đã được tiêm vào ở trên.
-        2. BẠN PHẢI LUÔN SỬ DỤNG TRUY CẬP INTERNET (Google Search) cho các câu hỏi về thời tiết, tin tức, hoặc dữ liệu hiện tại (trừ Ngày/Giờ).
-        3. Khi người dùng hỏi về thời tiết, HÃY DÙNG CHÍNH XÁC TỪ KHOÁ "thời tiết [địa điểm] hôm nay" để đảm bảo kết quả là MỚI NHẤT.
-        4. Tuyệt đối không được trả lời rằng bạn không thể cung cấp dữ liệu nếu có thể tìm kiếm trên Google.
+        ... (giữ nguyên toàn bộ nội dung lệnh cài đặt) ...
         """
         
         # Sửa lại: Định nghĩa cấu hình bằng Dictionary (Plain Dict)
@@ -36,7 +23,7 @@ if "chat_session" not in st.session_state:
         model = genai.GenerativeModel(
             'models/gemini-2.0-flash',
             system_instruction=lenh_cai_dat,
-            config=config_search # Dùng tham số config để bật search
+            # XÓA HOÀN TOÀN DÒNG config=config_search Ở ĐÂY
         )
         
         st.session_state.chat_session = model.start_chat(history=[]) 
