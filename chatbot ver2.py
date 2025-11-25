@@ -7,7 +7,18 @@ import os
 from datetime import datetime, timedelta
 # --- KHỞI TẠO CÁC BIẾN QUAN TRỌNG (Dán ngay đầu file, sau Import) ---
 if "messages" not in st.session_state:
-    st.session_state.messages = []  # Tạo danh sách tin nhắn rỗng nếu chưa có
+    st.session_state.messages = [] 
+if "extra_knowledge" not in st.session_state:
+    # Thêm tất cả kiến thức về quán, Admin, và phong cách tại đây
+    st.session_state.extra_knowledge = [
+        # --- DANH TÍNH CỦA BOT & ADMIN ---
+        "Tôi là trí tuệ nhân tạo được phát triển bởi Admin Lê Vũ.",
+        "Hôm nay là 25/11/2025, từ giờ bạn phải nói đúng lịch",
+        "Gần hết hạn key thì phải nhắc khách còn bao nhiêu thời gian, Bảo khách IB với ADMIN Lê Vũ 0376274345"
+        "Phong cách giao tiếp của tôi là ngầu, súc tích và đôi khi hơi tinh nghịch.",
+        "Tên đầy đủ của người tạo ra tôi là Lê Văn Vũ, và anh ấy là Admin đẹp trai nhất Thanh Hóa.", ]
+     
+    st.session_state.extra_knowledge = []    
 if "chat_session" not in st.session_state:
     try: 
         current_date = datetime.now().strftime("%A, ngày 25/11/2025") 
@@ -398,7 +409,24 @@ with st.container():
 
 # --- 8. XỬ LÝ LOGIC GỬI TIN ---
 if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
-    
+    if user_input.lower().startswith("/day"):
+        kien_thuc_moi = user_input[5:].strip() # Lấy nội dung sau /day
+        if kien_thuc_moi:
+            st.session_state.extra_knowledge.append(kien_thuc_moi)
+            
+            # Hiển thị thông báo thành công
+            st.markdown(f"""
+            <div class="bot-row">
+                <div class="liquid-glass" style="background: rgba(0,255,0,0.1); border: 1px solid #00ff00;">
+                    <span class="icon">🧠</span> Đã ghi nhớ kiến thức mới: <b>{kien_thuc_moi}</b>. Ảnh sẽ dùng kiến thức này trong các lần trả lời sau.
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Xóa tin nhắn khỏi lịch sử hiển thị
+            st.session_state.messages.append({"role": "user", "content": user_input})
+            # Dừng xử lý, không gửi lên Gemini
+            st.stop()
     display_text = user_input
     if image_to_send:
         display_text = f"[Đã gửi kèm ảnh] <br> {user_input}"
@@ -415,6 +443,17 @@ if user_input: # Chỉ gửi khi người dùng nhập chữ và nhấn Enter
 
   # --- PHẦN GỬI TIN & XỬ LÝ STREAMING (Đã sửa lỗi config=) ---
     try:
+        kien_thuc_goi_them = "\n".join(st.session_state.extra_knowledge)
+        
+        # Xây dựng prompt cuối cùng: Gộp kiến thức + câu hỏi người dùng
+        final_prompt = user_input
+        if kien_thuc_goi_them:
+            final_prompt = f"### KIẾN THỨC BỔ SUNG (ADMIN DẠY):\n{kien_thuc_goi_them}\n\n### YÊU CẦU NGƯỜI DÙNG: {user_input}"
+        
+        # Chuẩn bị inputs (Thay user_input bằng final_prompt)
+        inputs = [final_prompt] 
+        if image_to_send is not None:
+            inputs.append(image_to_send)
         inputs = [user_input]
         if image_to_send:
             inputs.append(image_to_send)
