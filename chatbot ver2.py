@@ -5,7 +5,6 @@ import json
 import secrets
 import os
 from datetime import datetime, timedelta
-from google.generativeai.types import GenerateContentConfig
 # --- KHỞI TẠO CÁC BIẾN QUAN TRỌNG (Dán ngay đầu file, sau Import) ---
 if "messages" not in st.session_state:
     st.session_state.messages = []  # Tạo danh sách tin nhắn rỗng nếu chưa có
@@ -19,14 +18,16 @@ if "chat_session" not in st.session_state:
         """
         
         # Tách riêng cấu hình tìm kiếm (Grounding)
-        config_search = GenerateContentConfig(
-            tools=[{'googleSearch': {}}]
-        )
+        if "chat_session" not in st.session_state:
+
+            config_search = {
+            "tools": [{'googleSearch': {}}]
+        }
 
         model = genai.GenerativeModel(
             'models/gemini-2.0-flash',
             system_instruction=lenh_cai_dat,
-            config=config_search # Dùng tham số config để bật search
+            config=config_search # API sẽ tự động cast từ Dict sang Type
         )
         
         st.session_state.chat_session = model.start_chat(history=[]) 
