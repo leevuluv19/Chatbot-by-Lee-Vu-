@@ -39,7 +39,7 @@ FILE_DATA = "key_data.json"
 SDT_ADMIN = "0376274345"
 ADMIN_PASSWORD = "levudepzai"
 
-# --- 4. ĐỊNH NGHĨA TOÀN BỘ HÀM (QUAN TRỌNG) ---
+# --- 4. ĐỊNH NGHĨA TOÀN BỘ HÀM ---
 def load_data():
     if not os.path.exists(FILE_DATA):
         with open(FILE_DATA, 'w', encoding='utf-8') as f: json.dump({}, f)
@@ -112,7 +112,7 @@ def get_audio_html(text, lang='vi'):
         return f"""<audio controls class="stAudio" src="data:audio/mp3;base64,{b64}" style="width: 100%; height: 30px; margin-top: 5px; opacity: 0.8;"></audio>"""
     except: return ""
 
-# --- 5. KHỞI TẠO MODEL GEMINI (BẢN 1.5 FLASH ỔN ĐỊNH) ---
+# --- 5. KHỞI TẠO MODEL GEMINI (FIX LỖI 404) ---
 if "chat_session" not in st.session_state:
     try:
         api_key = st.secrets["GOOGLE_API_KEY"]
@@ -124,9 +124,9 @@ if "chat_session" not in st.session_state:
         Luôn chú ý đến thời gian thực được cung cấp trong mỗi câu hỏi.
         """
         
-        # SỬ DỤNG GEMINI 1.5 FLASH (KHÔNG LỖI 404)
+        # SỬ DỤNG TÊN CHUẨN: gemini-1.5-flash (Bỏ models/)
         model = genai.GenerativeModel(
-            'models/gemini-1.5-flash', 
+            'gemini-1.5-flash', 
             system_instruction=base_instruction
         )
         st.session_state.chat_session = model.start_chat(history=[])
@@ -237,18 +237,15 @@ if st.session_state.logged_in:
                 if role == "assistant" and len(message["content"]) < 500: audio = get_audio_html(message["content"])
                 st.markdown(f"""<div class="{css}"><div class="liquid-glass"><span class='icon'>{icon}</span> {message["content"]}</div>{audio}</div>""", unsafe_allow_html=True)
 
-    # --- INPUT KHU VỰC (MIC CĂN CHỈNH) ---
+    # Input Area
     with st.container():
         with st.expander("📸 Tải ảnh", expanded=False):
             uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg","png"], label_visibility="collapsed")
             img_send = Image.open(uploaded_file) if uploaded_file else None
             if img_send: st.image(img_send, width=100)
 
-        # SỬ DỤNG vertical_alignment="bottom" ĐỂ MIC THẲNG HÀNG
         c_mic, c_input = st.columns([1, 6], vertical_alignment="bottom")
-        
-        with c_mic: 
-            mic = mic_recorder(start_prompt="🎙️", stop_prompt="⏹️", key='mic', just_once=True, use_container_width=True)
+        with c_mic: mic = mic_recorder(start_prompt="🎙️", stop_prompt="⏹️", key='mic', just_once=True, use_container_width=True)
         voice_text = mic.get('text') if mic else ""
         
         with c_input:
@@ -283,7 +280,6 @@ if st.session_state.logged_in:
             vn_tz = pytz.timezone('Asia/Ho_Chi_Minh')
             now_str = datetime.now(vn_tz).strftime("%H:%M:%S ngày %d/%m/%Y")
             
-            # Gắn thời gian vào prompt ẩn
             final_prompt = f"[{now_str}] Khách hỏi: {user_input}"
             if st.session_state.extra_knowledge:
                 final_prompt = f"Kiến thức bổ sung:\n" + "\n".join(st.session_state.extra_knowledge) + "\n\n" + final_prompt
