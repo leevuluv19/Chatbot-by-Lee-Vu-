@@ -531,36 +531,25 @@ with st.container():
             image_to_send = Image.open(uploaded_file)
             st.image(image_to_send, width=50, caption="Ảnh đã chọn")
             st.caption("✅ Ảnh đã sẵn sàng. Nhấn Enter để gửi.")
-col_mic, col_input = st.columns([1, 5])
-    
-with col_mic:
-        st.write(" ") # Đẩy Mic xuống căn lề
-        st.write(" ")
-        # Tạo nút ghi âm và lưu vào session state
-        mic_output = mic_recorder(
-            start_prompt="🎤 Ghi âm",
-            stop_prompt="⏹️ Dừng",
-            key='mic_rec',
-            just_once=True # Chỉ ghi âm một lần
-        )
-
-    # Lấy văn bản từ mic input
-        user_voice_input = ""
-if mic_output and mic_output['text']:
-        user_voice_input = mic_output['text']
-
-with col_input:
-        # Sử dụng text_area hoặc một hình thức input khác để hiển thị văn bản mic
-        # Tạm thời, ta dùng text_input để hiển thị nội dung nếu có
-        # user_input = st.chat_input("Nhập tin nhắn của bạn...") 
+cuser_voice_input = ""
+if mic_output:
+        # SỬ DỤNG .get('text') ĐỂ TRUY CẬP AN TOÀN
+        transcribed_text = mic_output.get('text') 
         
-        # Nếu có giọng nói, hiển thị nó trong text area
+        # Kiểm tra xem có văn bản nào được trả về không
+        if transcribed_text:
+             user_voice_input = transcribed_text.strip()
+             
+    # --- Tiếp theo là logic hiển thị input của bạn ---
+    
+with col_input:
+        # Giờ đây, chỉ cần user_voice_input có giá trị là nó sẽ hiển thị
         if user_voice_input:
-             user_input = st.text_input("Nhập tin nhắn của bạn...", value=user_voice_input)
+             # Đặt giá trị mặc định cho text_input nếu có giọng nói
+             user_input = st.text_input("Nhập tin nhắn của bạn...", value=user_voice_input, key='mic_text_input')
         else:
              user_input = st.chat_input("Nhập tin nhắn của bạn...")
 
-# --- 8. XỬ LÝ LOGIC GỬI TIN ---
 # Code logic (if user_input:)
     # 7.2. Thanh Chat Input (Nằm ngay dưới)
 user_input = st.chat_input("Nhập tin nhắn của bạn...")
