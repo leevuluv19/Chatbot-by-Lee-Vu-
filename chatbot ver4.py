@@ -94,7 +94,7 @@ if "chat_session" not in st.session_state or st.session_state.get("model") is No
         config_search = {"tools": [{'googleSearch': {}}]}
         api_key = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('models/gemini-2.5-flash-exp-01-21', system_instruction=lenh_cai_dat_final)
+        model = genai.GenerativeModel('models/gemini-2.0-flash-exp', system_instruction=lenh_cai_dat_final)
         st.session_state.model = model
         st.session_state.config_search = config_search
         st.session_state.chat_session = model.start_chat(history=[])
@@ -281,28 +281,39 @@ if st.session_state.logged_in:
                     else: st.warning("Thiếu SĐT!")
 
     # --- HIỂN THỊ LỊCH SỬ CHAT (CÓ AUDIO CHO BOT) ---
-    chat_container = st.container()
-    with chat_container:
-        for message in st.session_state.messages:
-            role_icon = "⭐" if message["role"] == "user" else "🤖"
-            css_class = "user-row" if message["role"] == "user" else "bot-row"
-            content_html = ""
-            
-            if isinstance(message["content"], str) and message["content"].startswith("http") and "pollinations.ai" in message["content"]:
-                 content_html = f"""<div class="chat-content"><span class="icon">{role_icon}</span> <div>Đây là ảnh em vừa vẽ nè:</div></div>"""
-                 st.markdown(f"""<div class="{css_class}"><div class="liquid-glass">{content_html}</div></div>""", unsafe_allow_html=True)
-                 st.image(message["content"], width=400)
+    # --- KHU VỰC NHẬP LIỆU (MIC & TEXT) ---
+    with st.container():
+        # 1. Thanh công cụ upload ảnh
+        with st.expander("📸 Tải ảnh lên để hỏi Bot", expanded=False):
+            uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
+            image_to_send = None
+            if uploaded_file:
+                image_to_send = Image.open(uploaded_file)
+                st.image(image_to_send, width=100, caption="Ảnh đã chọn")
+
+        # 2. CĂN CHỈNH MIC VÀ INPUT
+        # Thêm vertical_alignment="bottom" để mic tụt xuống ngang hàng với ô chat
+        col_mic, col_input = st.columns([1, 6], vertical_alignment="bottom") 
+        
+        with col_mic:
+            # Không cần st.write("") nữa vì đã có vertical_alignment
+            mic_output = mic_recorder(
+                start_prompt="🎙️ Nói", 
+                stop_prompt="⏹️ Xong", 
+                key='mic_rec', 
+                just_once=True, 
+                use_container_width=True
+            )
+
+        user_voice_input = ""
+        if mic_output and mic_output.get('text'):
+            user_voice_input = mic_output.get('text')
+
+        with col_input:
+            if user_voice_input:
+                 user_input = st.text_input("Nội dung:", value=user_voice_input, key="voice_input_box", label_visibility="collapsed")
             else:
-                # Nếu là Bot, thêm thanh audio vào nội dung HTML
-                audio_html = ""
-                if message["role"] == "assistant":
-                    # Chỉ tạo audio cho các tin nhắn văn bản ngắn/trung bình để tránh lag
-                    if len(message["content"]) < 1000: 
-                         audio_html = get_audio_html(message["content"])
-
-                content_html = f"""<div class="chat-content"><span class="icon">{role_icon}</span> <div>{message["content"]}</div></div>{audio_html}"""
-                st.markdown(f"""<div class="{css_class}"><div class="liquid-glass">{content_html}</div></div>""", unsafe_allow_html=True)
-
+                 user_input = st.chat_input("Nhập tin nhắn của bạn...")
     # --- INPUT KHU VỰC ---
     with st.container():
         with st.expander("📸 Tải ảnh lên", expanded=False):
