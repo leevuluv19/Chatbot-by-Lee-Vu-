@@ -314,21 +314,6 @@ if st.session_state.logged_in:
                  user_input = st.text_input("Nội dung:", value=user_voice_input, key="voice_input_box", label_visibility="collapsed")
             else:
                  user_input = st.chat_input("Nhập tin nhắn của bạn...")
-    # --- INPUT KHU VỰC ---
-    with st.container():
-        with st.expander("📸 Tải ảnh lên", expanded=False):
-            uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
-            image_to_send = Image.open(uploaded_file) if uploaded_file else None
-            if image_to_send: st.image(image_to_send, width=100)
-
-        col_mic, col_input = st.columns([1, 5])
-        with col_mic:
-            st.write(""); st.write("")
-            mic_output = mic_recorder(start_prompt="🎤 Nói", stop_prompt="⏹️ Dừng", key='mic_rec', just_once=True, use_container_width=True)
-        user_voice_input = mic_output.get('text') if mic_output else ""
-        with col_input:
-            user_input = st.text_input("Nhập tin nhắn...", value=user_voice_input, key="voice_input_box") if user_voice_input else st.chat_input("Nhập tin nhắn của bạn...")
-
     # --- XỬ LÝ TIN NHẮN ---
     if user_input:
         if st.session_state.get('user_role') == 'trial':
