@@ -94,7 +94,7 @@ if "chat_session" not in st.session_state or st.session_state.get("model") is No
         config_search = {"tools": [{'googleSearch': {}}]}
         api_key = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('models/gemini-2.0-pro-exp-01-21', system_instruction=lenh_cai_dat_final)
+        model = genai.GenerativeModel('models/gemini-2.5-flash-exp-01-21', system_instruction=lenh_cai_dat_final)
         st.session_state.model = model
         st.session_state.config_search = config_search
         st.session_state.chat_session = model.start_chat(history=[])
