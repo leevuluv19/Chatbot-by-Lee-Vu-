@@ -282,6 +282,7 @@ if st.session_state.logged_in:
 
     # --- HIỂN THỊ LỊCH SỬ CHAT (CÓ AUDIO CHO BOT) ---
     # --- KHU VỰC NHẬP LIỆU (MIC & TEXT) ---
+    chat_container = st.container()
     with st.container():
         # 1. Thanh công cụ upload ảnh
         with st.expander("📸 Tải ảnh lên để hỏi Bot", expanded=False):
