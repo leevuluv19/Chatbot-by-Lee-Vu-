@@ -39,7 +39,7 @@ FILE_DATA = "key_data.json"
 SDT_ADMIN = "0376274345"
 ADMIN_PASSWORD = "levudepzai"
 
-# --- 4. ĐỊNH NGHĨA TOÀN BỘ HÀM (QUAN TRỌNG: PHẢI ĐỂ Ở ĐÂY) ---
+# --- 4. ĐỊNH NGHĨA TOÀN BỘ HÀM (QUAN TRỌNG) ---
 def load_data():
     if not os.path.exists(FILE_DATA):
         with open(FILE_DATA, 'w', encoding='utf-8') as f: json.dump({}, f)
@@ -94,7 +94,6 @@ def kiem_tra_dang_nhap(input_key, input_sdt):
             try:
                 han_su_dung = datetime.strptime(han_su_dung_str, "%d/%m/%Y %H:%M").replace(tzinfo=vietnam_tz)
             except:
-                # Fallback cho định dạng cũ nếu có
                 han_su_dung = datetime.strptime(han_su_dung_str, "%Y-%m-%d %H:%M").replace(tzinfo=vietnam_tz)
                 
             if datetime.now(vietnam_tz) > han_su_dung: return False, None, f"⚠️ Key đã HẾT HẠN!"
@@ -113,21 +112,21 @@ def get_audio_html(text, lang='vi'):
         return f"""<audio controls class="stAudio" src="data:audio/mp3;base64,{b64}" style="width: 100%; height: 30px; margin-top: 5px; opacity: 0.8;"></audio>"""
     except: return ""
 
-# --- 5. KHỞI TẠO MODEL GEMINI ---
+# --- 5. KHỞI TẠO MODEL GEMINI (BẢN 1.5 FLASH ỔN ĐỊNH) ---
 if "chat_session" not in st.session_state:
     try:
         api_key = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=api_key)
         
-        # Cấu hình cơ bản
         base_instruction = """
         Bạn là Lê Vũ Intelligence. Trợ lý AI của Admin Lê Vũ.
-        Phong cách: Ngầu, súc tích, hữu ích.
-        Luôn trả lời bằng tiếng Việt.
+        Phong cách: Ngầu, súc tích, hữu ích. Luôn trả lời bằng tiếng Việt.
+        Luôn chú ý đến thời gian thực được cung cấp trong mỗi câu hỏi.
         """
         
+        # SỬ DỤNG GEMINI 1.5 FLASH (KHÔNG LỖI 404)
         model = genai.GenerativeModel(
-            'models/gemini-1.5-flash', # Dùng bản ổn định
+            'models/gemini-1.5-flash', 
             system_instruction=base_instruction
         )
         st.session_state.chat_session = model.start_chat(history=[])
@@ -178,7 +177,6 @@ st.markdown("""
     .header-logo-fixed { position: fixed; top: 20px; right: 40px; z-index: 1000; font-size: 1.5rem; }
     .footer-text-fixed { position: fixed; bottom: 15px; left: 20px; z-index: 1000; font-size: 0.8rem; color: white; opacity: 0.9; }
     
-    /* NOTIFICATION BOX */
     [data-testid="stAlert"] { background-color: rgba(0, 0, 0, 0.5) !important; border: 1px solid #00C6FF !important; color: white !important; }
     .block-container { padding-bottom: 100px !important; }
 </style>
@@ -231,7 +229,6 @@ if st.session_state.logged_in:
             css = "user-row" if role == "user" else "bot-row"
             icon = "⭐" if role == "user" else "🤖"
             
-            # Xử lý ảnh vẽ
             if isinstance(message["content"], str) and "pollinations.ai" in message["content"]:
                  st.markdown(f"""<div class="{css}"><div class="liquid-glass">🖼️ Ảnh em vẽ nè:</div></div>""", unsafe_allow_html=True)
                  st.image(message["content"], width=400)
@@ -240,15 +237,18 @@ if st.session_state.logged_in:
                 if role == "assistant" and len(message["content"]) < 500: audio = get_audio_html(message["content"])
                 st.markdown(f"""<div class="{css}"><div class="liquid-glass"><span class='icon'>{icon}</span> {message["content"]}</div>{audio}</div>""", unsafe_allow_html=True)
 
-    # Input Area
+    # --- INPUT KHU VỰC (MIC CĂN CHỈNH) ---
     with st.container():
         with st.expander("📸 Tải ảnh", expanded=False):
             uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg","png"], label_visibility="collapsed")
             img_send = Image.open(uploaded_file) if uploaded_file else None
             if img_send: st.image(img_send, width=100)
 
+        # SỬ DỤNG vertical_alignment="bottom" ĐỂ MIC THẲNG HÀNG
         c_mic, c_input = st.columns([1, 6], vertical_alignment="bottom")
-        with c_mic: mic = mic_recorder(start_prompt="🎙️", stop_prompt="⏹️", key='mic', just_once=True, use_container_width=True)
+        
+        with c_mic: 
+            mic = mic_recorder(start_prompt="🎙️", stop_prompt="⏹️", key='mic', just_once=True, use_container_width=True)
         voice_text = mic.get('text') if mic else ""
         
         with c_input:
@@ -256,7 +256,6 @@ if st.session_state.logged_in:
 
     # Xử lý Logic
     if user_input:
-        # Trial Check
         if st.session_state.get('user_role') == 'trial':
             if st.session_state.trial_count >= TRIAL_LIMIT: 
                 st.error("Hết lượt dùng thử!"); st.session_state.logged_in = False; st.rerun()
@@ -280,11 +279,11 @@ if st.session_state.logged_in:
         if img_send: st.image(img_send, width=200)
 
         try:
-            # --- LOGIC THỜI GIAN THỰC ---
+            # LOGIC THỜI GIAN THỰC
             vn_tz = pytz.timezone('Asia/Ho_Chi_Minh')
             now_str = datetime.now(vn_tz).strftime("%H:%M:%S ngày %d/%m/%Y")
             
-            # Gắn thời gian vào prompt ẩn để Bot luôn biết giờ
+            # Gắn thời gian vào prompt ẩn
             final_prompt = f"[{now_str}] Khách hỏi: {user_input}"
             if st.session_state.extra_knowledge:
                 final_prompt = f"Kiến thức bổ sung:\n" + "\n".join(st.session_state.extra_knowledge) + "\n\n" + final_prompt
@@ -294,7 +293,6 @@ if st.session_state.logged_in:
 
             with chat_container:
                 with st.spinner("Thinking..."):
-                    # Gửi trực tiếp không dùng history session để tránh lỗi cache giờ
                     response = st.session_state.chat_session.send_message(inputs, stream=True)
                     placeholder = st.empty()
                     full_resp = ""
@@ -303,7 +301,6 @@ if st.session_state.logged_in:
                             full_resp += chunk.text
                             placeholder.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class='icon'>🤖</span> {full_resp}</div></div>""", unsafe_allow_html=True)
                     
-                    # TTS Audio
                     audio = get_audio_html(full_resp)
                     placeholder.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class='icon'>🤖</span> {full_resp}</div>{audio}</div>""", unsafe_allow_html=True)
                     
