@@ -3,3 +3,4 @@ streamlit-paste-button
 google-genai
 google-generativeai
 pytz
+streamlit-mic-recorder
