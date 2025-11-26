@@ -10,7 +10,6 @@ import pytz
 from gtts import gTTS
 import base64
 import io
-from streamlit_mic_recorder import mic_recorder
 import urllib.parse
 
 # --- 1. CẤU HÌNH TRANG ---
@@ -21,7 +20,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. KHỞI TẠO BIẾN (SESSION STATE) ---
+# --- 2. KHỞI TẠO BIẾN ---
 TRIAL_LIMIT = 3
 if "trial_count" not in st.session_state: st.session_state.trial_count = 0
 if "messages" not in st.session_state: st.session_state.messages = []
@@ -34,12 +33,12 @@ if "extra_knowledge" not in st.session_state:
         "SDT liên hệ Admin: 0376274345."
     ]
 
-# --- 3. CẤU HÌNH ADMIN & API ---
+# --- 3. CẤU HÌNH ADMIN ---
 FILE_DATA = "key_data.json"
 SDT_ADMIN = "0376274345"
 ADMIN_PASSWORD = "levudepzai"
 
-# --- 4. ĐỊNH NGHĨA TOÀN BỘ HÀM ---
+# --- 4. ĐỊNH NGHĨA HÀM ---
 def load_data():
     if not os.path.exists(FILE_DATA):
         with open(FILE_DATA, 'w', encoding='utf-8') as f: json.dump({}, f)
@@ -58,11 +57,9 @@ def tao_key_moi(sdt_khach, ghi_chu, so_ngay_dung):
     data = load_data()
     phan_duoi = secrets.token_hex(4).upper()
     new_key = f"KEY-{phan_duoi[:4]}-{phan_duoi[4:]}"
-    
     vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
     ngay_hien_tai = datetime.now(vietnam_tz)
     ngay_het_han = ngay_hien_tai + timedelta(days=so_ngay_dung)
-    
     data[new_key] = {
         "status": "active", "sdt": sdt_khach, 
         "created_at": ngay_hien_tai.strftime("%d/%m/%Y %H:%M"),
@@ -87,7 +84,6 @@ def kiem_tra_dang_nhap(input_key, input_sdt):
     if input_key in data:
         thong_tin = data[input_key]
         if thong_tin.get("sdt") != input_sdt: return False, None, f"❌ Sai SĐT đăng ký!"
-        
         han_su_dung_str = thong_tin.get("expiry_date")
         if han_su_dung_str:
             vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
@@ -95,13 +91,12 @@ def kiem_tra_dang_nhap(input_key, input_sdt):
                 han_su_dung = datetime.strptime(han_su_dung_str, "%d/%m/%Y %H:%M").replace(tzinfo=vietnam_tz)
             except:
                 han_su_dung = datetime.strptime(han_su_dung_str, "%Y-%m-%d %H:%M").replace(tzinfo=vietnam_tz)
-                
             if datetime.now(vietnam_tz) > han_su_dung: return False, None, f"⚠️ Key đã HẾT HẠN!"
-            
         return True, "user", f"Xin chào {input_sdt}!"
     return False, None, f"❌ Key không tồn tại!"
 
 def get_audio_html(text, lang='vi'):
+    """Chuyển text thành giọng nói (Bot Voice)"""
     if not text or len(text.strip()) == 0: return ""
     try:
         tts = gTTS(text=text, lang=lang)
@@ -109,22 +104,20 @@ def get_audio_html(text, lang='vi'):
         tts.write_to_fp(fp)
         fp.seek(0)
         b64 = base64.b64encode(fp.read()).decode()
+        # Thanh audio nhỏ gọn cho bot
         return f"""<audio controls class="stAudio" src="data:audio/mp3;base64,{b64}" style="width: 100%; height: 30px; margin-top: 5px; opacity: 0.8;"></audio>"""
     except: return ""
 
-# --- 5. KHỞI TẠO MODEL GEMINI (FIX LỖI 404) ---
+# --- 5. KHỞI TẠO MODEL GEMINI ---
 if "chat_session" not in st.session_state:
     try:
         api_key = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=api_key)
-        
         base_instruction = """
         Bạn là Lê Vũ Intelligence. Trợ lý AI của Admin Lê Vũ.
         Phong cách: Ngầu, súc tích, hữu ích. Luôn trả lời bằng tiếng Việt.
-        Luôn chú ý đến thời gian thực được cung cấp trong mỗi câu hỏi.
         """
-        
-        # SỬ DỤNG TÊN CHUẨN: gemini-1.5-flash (Bỏ models/)
+        # SỬ DỤNG TÊN CHUẨN (KHÔNG CÓ 'models/') ĐỂ TRÁNH LỖI 404
         model = genai.GenerativeModel(
             'gemini-1.5-flash', 
             system_instruction=base_instruction
@@ -237,19 +230,15 @@ if st.session_state.logged_in:
                 if role == "assistant" and len(message["content"]) < 500: audio = get_audio_html(message["content"])
                 st.markdown(f"""<div class="{css}"><div class="liquid-glass"><span class='icon'>{icon}</span> {message["content"]}</div>{audio}</div>""", unsafe_allow_html=True)
 
-    # Input Area
+    # INPUT: CHỈ CÒN TẢI ẢNH & CHAT TEXT (ĐÃ BỎ MIC)
     with st.container():
         with st.expander("📸 Tải ảnh", expanded=False):
             uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg","png"], label_visibility="collapsed")
             img_send = Image.open(uploaded_file) if uploaded_file else None
             if img_send: st.image(img_send, width=100)
 
-        c_mic, c_input = st.columns([1, 6], vertical_alignment="bottom")
-        with c_mic: mic = mic_recorder(start_prompt="🎙️", stop_prompt="⏹️", key='mic', just_once=True, use_container_width=True)
-        voice_text = mic.get('text') if mic else ""
-        
-        with c_input:
-            user_input = st.text_input("Chat:", value=voice_text, key="input", label_visibility="collapsed") if voice_text else st.chat_input("Nhập tin nhắn...")
+        # Input text bình thường
+        user_input = st.chat_input("Nhập tin nhắn của bạn...")
 
     # Xử lý Logic
     if user_input:
@@ -270,13 +259,13 @@ if st.session_state.logged_in:
                     st.session_state.messages.append({"role": "assistant", "content": url})
             st.stop()
 
-        # Chat với Gemini (Kèm Thời Gian Thực)
+        # Chat với Gemini
         st.session_state.messages.append({"role": "user", "content": user_input})
         with chat_container: st.markdown(f"""<div class="user-row"><div class="liquid-glass">{user_input}</div></div>""", unsafe_allow_html=True)
         if img_send: st.image(img_send, width=200)
 
         try:
-            # LOGIC THỜI GIAN THỰC
+            # Logic thời gian thực
             vn_tz = pytz.timezone('Asia/Ho_Chi_Minh')
             now_str = datetime.now(vn_tz).strftime("%H:%M:%S ngày %d/%m/%Y")
             
@@ -297,6 +286,7 @@ if st.session_state.logged_in:
                             full_resp += chunk.text
                             placeholder.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class='icon'>🤖</span> {full_resp}</div></div>""", unsafe_allow_html=True)
                     
+                    # Vẫn giữ Bot biết nói (TTS)
                     audio = get_audio_html(full_resp)
                     placeholder.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class='icon'>🤖</span> {full_resp}</div>{audio}</div>""", unsafe_allow_html=True)
                     
