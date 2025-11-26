@@ -10,6 +10,7 @@ import pytz
 from gtts import gTTS
 import base64
 import io
+from streamlit_mic_recorder import mic_recorder
 import urllib.parse
 
 # --- 1. CẤU HÌNH TRANG ---
@@ -20,7 +21,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. KHỞI TẠO BIẾN ---
+# --- 2. KHỞI TẠO BIẾN (SESSION STATE) ---
 TRIAL_LIMIT = 3
 if "trial_count" not in st.session_state: st.session_state.trial_count = 0
 if "messages" not in st.session_state: st.session_state.messages = []
@@ -33,7 +34,7 @@ if "extra_knowledge" not in st.session_state:
         "SDT liên hệ Admin: 0376274345."
     ]
 
-# --- 3. CẤU HÌNH ADMIN ---
+# --- 3. CẤU HÌNH ADMIN & API ---
 FILE_DATA = "key_data.json"
 SDT_ADMIN = "0376274345"
 ADMIN_PASSWORD = "levudepzai"
@@ -96,7 +97,6 @@ def kiem_tra_dang_nhap(input_key, input_sdt):
     return False, None, f"❌ Key không tồn tại!"
 
 def get_audio_html(text, lang='vi'):
-    """Chuyển text thành giọng nói (Bot Voice)"""
     if not text or len(text.strip()) == 0: return ""
     try:
         tts = gTTS(text=text, lang=lang)
@@ -104,11 +104,10 @@ def get_audio_html(text, lang='vi'):
         tts.write_to_fp(fp)
         fp.seek(0)
         b64 = base64.b64encode(fp.read()).decode()
-        # Thanh audio nhỏ gọn cho bot
         return f"""<audio controls class="stAudio" src="data:audio/mp3;base64,{b64}" style="width: 100%; height: 30px; margin-top: 5px; opacity: 0.8;"></audio>"""
     except: return ""
 
-# --- 5. KHỞI TẠO MODEL GEMINI ---
+# --- 5. KHỞI TẠO MODEL (DÙNG GEMINI PRO CLASSIC ĐỂ TRÁNH LỖI 404) ---
 if "chat_session" not in st.session_state:
     try:
         api_key = st.secrets["GOOGLE_API_KEY"]
@@ -117,11 +116,8 @@ if "chat_session" not in st.session_state:
         Bạn là Lê Vũ Intelligence. Trợ lý AI của Admin Lê Vũ.
         Phong cách: Ngầu, súc tích, hữu ích. Luôn trả lời bằng tiếng Việt.
         """
-        # SỬ DỤNG TÊN CHUẨN (KHÔNG CÓ 'models/') ĐỂ TRÁNH LỖI 404
-        model = genai.GenerativeModel(
-            'gemini-1.5-flash', 
-            system_instruction=base_instruction
-        )
+        # SỬ DỤNG GEMINI PRO (BẢN 1.0) SIÊU ỔN ĐỊNH
+        model = genai.GenerativeModel('gemini-pro', system_instruction=base_instruction)
         st.session_state.chat_session = model.start_chat(history=[])
     except Exception as e:
         st.error(f"Lỗi API: {e}")
@@ -140,7 +136,7 @@ st.markdown("""
     }
     #MainMenu, footer, header {visibility: hidden;}
     
-    /* NEON BORDER */
+    /* NEON */
     body::before, body::after {
         content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; pointer-events: none;
         padding: 2px; background: conic-gradient(from var(--angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
@@ -152,7 +148,6 @@ st.markdown("""
     @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
     @keyframes spin { to { --angle: 360deg; } }
 
-    /* CHAT BUBBLE */
     .liquid-glass {
         position: relative; background: rgba(255, 255, 255, 0.01); 
         backdrop-filter: blur(2px); border-radius: 35px; padding: 12px 25px; margin-bottom: 15px; 
@@ -161,7 +156,6 @@ st.markdown("""
     .user-row { display: flex; justify-content: flex-end; }
     .bot-row { display: flex; justify-content: flex-start; }
     
-    /* LOGO & FOOTER */
     .logo-glow {
         text-align: center; font-size: 2.5rem; font-weight: 800; color: white;
         text-shadow: 0 0 12px rgba(65, 105, 225, 1), 0 0 20px rgba(65, 105, 225, 1);
@@ -172,6 +166,9 @@ st.markdown("""
     
     [data-testid="stAlert"] { background-color: rgba(0, 0, 0, 0.5) !important; border: 1px solid #00C6FF !important; color: white !important; }
     .block-container { padding-bottom: 100px !important; }
+    
+    /* CĂN CHỈNH MIC VÀO GIỮA CỘT */
+    [data-testid="column"] { display: flex; align-items: flex-end; } 
 </style>
 """, unsafe_allow_html=True)
 
@@ -204,7 +201,6 @@ if st.session_state.logged_in:
     st.markdown(f"""<div class="logo-glow header-logo-fixed">Le Vu Intelligence</div>""", unsafe_allow_html=True)
     st.markdown("""<div class="footer-text-fixed">Designed by Le Van Vu</div>""", unsafe_allow_html=True)
 
-    # Panel Admin
     if st.session_state.get("user_role") == "admin":
         with st.expander("🛠️ ADMIN PANEL", expanded=False):
             c1, c2 = st.columns(2)
@@ -212,16 +208,14 @@ if st.session_state.logged_in:
             with c2: 
                 days = st.selectbox("Hạn dùng:", [1, 7, 30, 365, 3650])
                 if st.button("Tạo Key"): 
-                    if sdt_in: k, h = tao_key_moi(sdt_in, note_in, days); st.success(f"OK! Hạn: {h}"); st.code(k)
+                    if sdt_in: k, h = tao_key_moi(sdt_in, note_in, {"Dùng thử (1 ngày)": 1, "1 Tuần (7 ngày)": 7, "1 Tháng (30 ngày)": 30, "Vĩnh viễn (10 năm)": 3650}[days]); st.success(f"OK! Hạn: {h}"); st.code(k)
 
-    # Hiển thị Chat
     chat_container = st.container()
     with chat_container:
         for message in st.session_state.messages:
             role = message["role"]
             css = "user-row" if role == "user" else "bot-row"
             icon = "⭐" if role == "user" else "🤖"
-            
             if isinstance(message["content"], str) and "pollinations.ai" in message["content"]:
                  st.markdown(f"""<div class="{css}"><div class="liquid-glass">🖼️ Ảnh em vẽ nè:</div></div>""", unsafe_allow_html=True)
                  st.image(message["content"], width=400)
@@ -230,65 +224,58 @@ if st.session_state.logged_in:
                 if role == "assistant" and len(message["content"]) < 500: audio = get_audio_html(message["content"])
                 st.markdown(f"""<div class="{css}"><div class="liquid-glass"><span class='icon'>{icon}</span> {message["content"]}</div>{audio}</div>""", unsafe_allow_html=True)
 
-    # INPUT: CHỈ CÒN TẢI ẢNH & CHAT TEXT (ĐÃ BỎ MIC)
+    # --- INPUT AREA (CĂN CHỈNH MIC) ---
     with st.container():
         with st.expander("📸 Tải ảnh", expanded=False):
             uploaded_file = st.file_uploader("Chọn ảnh", type=["jpg","png"], label_visibility="collapsed")
             img_send = Image.open(uploaded_file) if uploaded_file else None
             if img_send: st.image(img_send, width=100)
 
-        # Input text bình thường
-        user_input = st.chat_input("Nhập tin nhắn của bạn...")
+        c_mic, c_input = st.columns([1, 6]) # Bỏ vertical_alignment vì bản cũ lỗi
+        with c_mic: 
+            # Dùng khoảng trắng để ép Mic xuống (CSS Hack)
+            st.write("") 
+            st.write("") 
+            mic = mic_recorder(start_prompt="🎙️", stop_prompt="⏹️", key='mic', just_once=True, use_container_width=True)
+        
+        voice_text = mic.get('text') if mic else ""
+        
+        with c_input:
+            user_input = st.text_input("Chat:", value=voice_text, key="input", label_visibility="collapsed") if voice_text else st.chat_input("Nhập tin nhắn...")
 
-    # Xử lý Logic
     if user_input:
         if st.session_state.get('user_role') == 'trial':
-            if st.session_state.trial_count >= TRIAL_LIMIT: 
-                st.error("Hết lượt dùng thử!"); st.session_state.logged_in = False; st.rerun()
+            if st.session_state.trial_count >= TRIAL_LIMIT: st.error("Hết lượt dùng thử!"); st.session_state.logged_in = False; st.rerun()
             st.session_state.trial_count += 1
 
-        # Vẽ tranh
-        if any(x in user_input.lower() for x in ["vẽ", "tạo ảnh", "draw"]):
+        if any(x in user_input.lower() for x in ["vẽ", "tạo ảnh"]):
             st.session_state.messages.append({"role": "user", "content": user_input})
             with chat_container: st.markdown(f"""<div class="user-row"><div class="liquid-glass">{user_input}</div></div>""", unsafe_allow_html=True)
             with chat_container:
                 with st.spinner("Đang vẽ..."):
-                    prompt = urllib.parse.quote(user_input)
-                    url = f"https://image.pollinations.ai/prompt/{prompt}"
-                    st.image(url, width=400)
-                    st.session_state.messages.append({"role": "assistant", "content": url})
+                    url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(user_input)}"
+                    st.image(url, width=400); st.session_state.messages.append({"role": "assistant", "content": url})
             st.stop()
 
-        # Chat với Gemini
         st.session_state.messages.append({"role": "user", "content": user_input})
         with chat_container: st.markdown(f"""<div class="user-row"><div class="liquid-glass">{user_input}</div></div>""", unsafe_allow_html=True)
         if img_send: st.image(img_send, width=200)
 
         try:
-            # Logic thời gian thực
             vn_tz = pytz.timezone('Asia/Ho_Chi_Minh')
             now_str = datetime.now(vn_tz).strftime("%H:%M:%S ngày %d/%m/%Y")
-            
             final_prompt = f"[{now_str}] Khách hỏi: {user_input}"
-            if st.session_state.extra_knowledge:
-                final_prompt = f"Kiến thức bổ sung:\n" + "\n".join(st.session_state.extra_knowledge) + "\n\n" + final_prompt
-
-            inputs = [final_prompt]
+            if st.session_state.extra_knowledge: final_prompt = "\n".join(st.session_state.extra_knowledge) + "\n\n" + final_prompt
+            inputs = [final_prompt]; 
             if img_send: inputs.append(img_send)
 
             with chat_container:
                 with st.spinner("Thinking..."):
                     response = st.session_state.chat_session.send_message(inputs, stream=True)
-                    placeholder = st.empty()
-                    full_resp = ""
+                    placeholder = st.empty(); full_resp = ""
                     for chunk in response:
-                        if chunk.text:
-                            full_resp += chunk.text
-                            placeholder.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class='icon'>🤖</span> {full_resp}</div></div>""", unsafe_allow_html=True)
-                    
-                    # Vẫn giữ Bot biết nói (TTS)
+                        if chunk.text: full_resp += chunk.text; placeholder.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class='icon'>🤖</span> {full_resp}</div></div>""", unsafe_allow_html=True)
                     audio = get_audio_html(full_resp)
                     placeholder.markdown(f"""<div class="bot-row"><div class="liquid-glass"><span class='icon'>🤖</span> {full_resp}</div>{audio}</div>""", unsafe_allow_html=True)
-                    
                     st.session_state.messages.append({"role": "assistant", "content": full_resp})
         except Exception as e: st.error(f"Lỗi: {e}")
