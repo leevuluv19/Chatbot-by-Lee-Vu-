@@ -104,10 +104,16 @@ if "chat_session" not in st.session_state or st.session_state.get("model") is No
 # --- BẮT ĐẦU KHỐI ĐỊNH NGHĨA HÀM (DATA & VALIDATION & TTS) ---
 def load_data():
     if not os.path.exists(FILE_DATA):
-        with open(FILE_DATA, 'w', encoding='utf-8') as f: json.dump({}, f)
+        with open(FILE_DATA, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
         return {}
-    try: with open(FILE_DATA, 'r', encoding='utf-8') as f: return json.load(f)
-    except: return {}
+    
+    # ĐOẠN NÀY ĐÃ ĐƯỢC SỬA LẠI CHO ĐÚNG CÚ PHÁP:
+    try:
+        with open(FILE_DATA, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except:
+        return {}
 
 def save_data(data):
     with open(FILE_DATA, 'w', encoding='utf-8') as f: json.dump(data, f, indent=4)
